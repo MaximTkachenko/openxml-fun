@@ -8,6 +8,11 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace OpenXmlFun.Excel.Parser
 {
+    /// <inheritdoc />
+    /// <summary>
+    /// Parse excel tables to list of enities.
+    /// </summary>
+    /// <typeparam name="T">Type of class which contains metadata required for parsing.</typeparam>
     public class ExcelParser<T> : IDisposable
         where T : new()
     {
@@ -54,8 +59,9 @@ namespace OpenXmlFun.Excel.Parser
         {
             List<T> list = new List<T>();
             Type stringType = typeof(string);
-            Type datetimeType = typeof(DateTime?);
+            Type datetimeType = typeof(DateTime);
             Type decimalType = typeof(decimal);
+            Type intType = typeof(Int32);
 
             Type type = typeof(T);
             PropertyInfo[] properties = type.GetProperties();
@@ -73,8 +79,8 @@ namespace OpenXmlFun.Excel.Parser
                 {
                     if (!numbers.ContainsKey(property.Name))
                     {
-                        object tmp = property.GetCustomAttributes(typeof(OrderParseAttribute), false).FirstOrDefault();
-                        numbers[property.Name] = ((OrderParseAttribute)tmp)?.Number ?? -1;
+                        object tmp = property.GetCustomAttributes(typeof(ParseDetailsAttribute), false).FirstOrDefault();
+                        numbers[property.Name] = ((ParseDetailsAttribute)tmp)?.Order ?? -1;
                     }
                     var tempNumber = numbers[property.Name];
                     if (tempNumber == -1)
@@ -95,14 +101,28 @@ namespace OpenXmlFun.Excel.Parser
                         continue;
                     }
 
+                    if (tempType == intType)
+                    {
+                        int tempValue;
+                        try
+                        {
+                            tempValue = (int)double.Parse(tempCellValue);
+                        }
+                        catch
+                        {
+                            tempValue = 0;
+                        }
+                        property.SetValue(item, tempValue, null);
+                        continue;
+                    }
+
                     if (tempType == datetimeType)
                     {
                         DateTime? tempDate;
                         try
                         {
-                            tempDate = DateTime.TryParse(tempCellValue, out DateTime date)
-                                ? date
-                                : DateTime.FromOADate(double.Parse(tempCellValue));
+                            tempDate = DateTime.Parse(tempCellValue);
+                            //: DateTime.FromOADate(double.Parse(tempCellValue));
                         }
                         catch
                         {
@@ -117,7 +137,7 @@ namespace OpenXmlFun.Excel.Parser
                         decimal tempDecimal;
                         try
                         {
-                            tempDecimal = ParseDecimal(tempCellValue);
+                            tempDecimal = decimal.Parse(tempCellValue);
                         }
                         catch
                         {
@@ -127,12 +147,6 @@ namespace OpenXmlFun.Excel.Parser
                     }
                 }
                 list.Add(item);
-            }
-
-            PropertyInfo keyProperty = properties.SingleOrDefault(p => p.GetCustomAttributes(typeof(UniqueKeyParseAttribute), false).FirstOrDefault() != null);
-            if (keyProperty != null)
-            {
-                list.RemoveAll(x => string.IsNullOrEmpty((string)keyProperty.GetValue(x, null)));
             }
 
             if (ignoreFirstRow)
@@ -174,12 +188,6 @@ namespace OpenXmlFun.Excel.Parser
             }
             _worksheet.Save();
             return rows;
-        }
-
-        private static decimal ParseDecimal(string number)
-        {
-            decimal.TryParse(number.Replace(".", ","), out decimal num);
-            return num;
         }
 
         public void Dispose()
