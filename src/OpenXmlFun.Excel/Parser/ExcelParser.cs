@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,7 +14,7 @@ namespace OpenXmlFun.Excel.Parser
     /// Parse excel tables to list of enities.
     /// </summary>
     /// <typeparam name="T">Type of class which contains metadata required for parsing.</typeparam>
-    public class ExcelParser<T> : IDisposable
+    public sealed class ExcelParser<T> : IDisposable
         where T : new()
     {
         private const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -23,6 +24,18 @@ namespace OpenXmlFun.Excel.Parser
         private readonly SpreadsheetDocument _spreadsheetDocument;
         private readonly Worksheet _worksheet;
         private readonly SharedStringTable _ssTable;
+
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly Dictionary<Type, (Func<string, object> parse, object defaultValue)> Parsers = 
+            new Dictionary<Type, (Func<string, object> parse, object defaultValue)>
+            {
+                {typeof(int), (str => (int)double.Parse(str, CultureInfo.InvariantCulture), 0)},
+                {typeof(float), (str => float.Parse(str, CultureInfo.InvariantCulture), 0)},
+                {typeof(double), (str => double.Parse(str, CultureInfo.InvariantCulture), 0)},
+                {typeof(decimal), (str => decimal.Parse(str, CultureInfo.InvariantCulture), 0M)},
+                {typeof(DateTime), (str => DateTime.Parse(str, CultureInfo.InvariantCulture), DateTime.MinValue)},
+                {typeof(string), (str => str, string.Empty)}
+            };
 
         static ExcelParser()
         {
@@ -58,10 +71,6 @@ namespace OpenXmlFun.Excel.Parser
         public List<T> Parse(bool ignoreFirstRow = false)
         {
             List<T> list = new List<T>();
-            Type stringType = typeof(string);
-            Type datetimeType = typeof(DateTime);
-            Type decimalType = typeof(decimal);
-            Type intType = typeof(Int32);
 
             Type type = typeof(T);
             PropertyInfo[] properties = type.GetProperties();
@@ -70,8 +79,14 @@ namespace OpenXmlFun.Excel.Parser
 
             List<Row> rows = CalculateFormulas();
 
-            foreach (Row row in rows)
+            for (int i = 0; i < rows.Count; i++)
             {
+                if (i == 0 && ignoreFirstRow)
+                {
+                    continue;
+                }
+
+                Row row = rows[i];
                 List<Cell> cells = row.Elements<Cell>().ToList();
 
                 T item = new T();
@@ -79,8 +94,9 @@ namespace OpenXmlFun.Excel.Parser
                 {
                     if (!numbers.ContainsKey(property.Name))
                     {
-                        object tmp = property.GetCustomAttributes(typeof(ParseDetailsAttribute), false).FirstOrDefault();
-                        numbers[property.Name] = ((ParseDetailsAttribute)tmp)?.Order ?? -1;
+                        object tmp = property.GetCustomAttributes(typeof(ParseDetailsAttribute), false)
+                            .FirstOrDefault();
+                        numbers[property.Name] = ((ParseDetailsAttribute) tmp)?.Order ?? -1;
                     }
                     var tempNumber = numbers[property.Name];
                     if (tempNumber == -1)
@@ -94,64 +110,25 @@ namespace OpenXmlFun.Excel.Parser
                     }
                     Type tempType = types[property.Name];
 
-                    string tempCellValue = GetDataFromCell(cells, row.RowIndex.Value, tempNumber);
-                    if (tempType == stringType)
+                    if (!Parsers.ContainsKey(tempType))
                     {
-                        property.SetValue(item, tempCellValue ?? string.Empty, null);
-                        continue;
+                        throw new NotSupportedException($@"{nameof(tempType.Name)} is not supported. Supported types: 
+{nameof(Int32)}, {nameof(Single)}, {nameof(Double)}, {nameof(Decimal)}, {nameof(DateTime)}, {nameof(String)}");
                     }
 
-                    if (tempType == intType)
+                    string cellValue = GetDataFromCell(cells, row.RowIndex.Value, tempNumber);
+                    object parsedValue;
+                    try
                     {
-                        int tempValue;
-                        try
-                        {
-                            tempValue = (int)double.Parse(tempCellValue);
-                        }
-                        catch
-                        {
-                            tempValue = 0;
-                        }
-                        property.SetValue(item, tempValue, null);
-                        continue;
+                        parsedValue = Parsers[tempType].parse.Invoke(cellValue);
                     }
-
-                    if (tempType == datetimeType)
+                    catch
                     {
-                        DateTime? tempDate;
-                        try
-                        {
-                            tempDate = DateTime.Parse(tempCellValue);
-                            //: DateTime.FromOADate(double.Parse(tempCellValue));
-                        }
-                        catch
-                        {
-                            tempDate = null;
-                        }
-                        property.SetValue(item, tempDate, null);
-                        continue;
+                        parsedValue = Parsers[tempType].defaultValue;
                     }
-
-                    if (tempType == decimalType)
-                    {
-                        decimal tempDecimal;
-                        try
-                        {
-                            tempDecimal = decimal.Parse(tempCellValue);
-                        }
-                        catch
-                        {
-                            tempDecimal = 0;
-                        }
-                        property.SetValue(item, tempDecimal, null);
-                    }
+                    property.SetValue(item, parsedValue, null);
                 }
                 list.Add(item);
-            }
-
-            if (ignoreFirstRow)
-            {
-                list.RemoveAt(0);
             }
             return list;
         }

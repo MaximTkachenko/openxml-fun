@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Text;
 using FluentAssertions;
 using NUnit.Framework;
 using OpenXmlFun.Excel.Parser;
@@ -28,16 +27,23 @@ namespace OpenXmlFun.Excel.IntegrationTests.Parser
         }
 
         [Test]
-        public void Parse_CorrectDocument_WorksOk()
+        [TestCase("en-US")]
+        [TestCase("en-GB")]
+        [TestCase("ru-RU")]
+        public void Parse_CorrectDocument_WorksOk(string culture)
         {
+            var cultureInfo = new CultureInfo(culture);
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+            string filePath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"Parser\ItemsToParse.xlsx");
+
             List<ItemToParse> items;
-            using (var parser = new ExcelParser<ItemToParse>(Path.Combine(TestContext.CurrentContext.TestDirectory, @"Parser\ItemsToParse.xlsx")))
+            using (var parser = new ExcelParser<ItemToParse>(filePath))
             {
                 items = parser.Parse(true);
             }
 
             items.Count.Should().Be(3);
-
             items[0].Number.Should().Be(1);
             items[0].Description.Should().Be("description one");
             items[0].Created.Should().Be(new DateTime(2018, 2, 3));
