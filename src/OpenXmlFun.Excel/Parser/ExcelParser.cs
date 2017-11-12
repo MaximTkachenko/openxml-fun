@@ -54,7 +54,7 @@ namespace OpenXmlFun.Excel.Parser
         {
             if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
             {
-                throw new FileNotFoundException($"{nameof(filePath)} argument is invalid.");
+                throw new FileNotFoundException($"{nameof(filePath)} empty or doesn't exist.");
             }
 
             _spreadsheetDocument = SpreadsheetDocument.Open(filePath, true);
@@ -70,13 +70,11 @@ namespace OpenXmlFun.Excel.Parser
 
         public List<T> Parse(bool ignoreFirstRow = false)
         {
-            List<T> list = new List<T>();
-
             Type type = typeof(T);
             PropertyInfo[] properties = type.GetProperties();
-            Dictionary<string, int> numbers = new Dictionary<string, int>();
-            Dictionary<string, Type> types = new Dictionary<string, Type>();
+            var numbers = new Dictionary<string, int>();
 
+            var list = new List<T>();
             List<Row> rows = CalculateFormulas();
 
             for (int i = 0; i < rows.Count; i++)
@@ -98,33 +96,28 @@ namespace OpenXmlFun.Excel.Parser
                             .FirstOrDefault();
                         numbers[property.Name] = ((ParseDetailsAttribute) tmp)?.Order ?? -1;
                     }
-                    var tempNumber = numbers[property.Name];
-                    if (tempNumber == -1)
+                    int propertyOrder = numbers[property.Name];
+                    if (propertyOrder == -1)
                     {
                         continue;
                     }
 
-                    if (!types.ContainsKey(property.Name))
+                    Type propertyType = property.PropertyType;
+                    if (!Parsers.ContainsKey(propertyType))
                     {
-                        types[property.Name] = property.PropertyType;
-                    }
-                    Type tempType = types[property.Name];
-
-                    if (!Parsers.ContainsKey(tempType))
-                    {
-                        throw new NotSupportedException($@"{nameof(tempType.Name)} is not supported. Supported types: 
+                        throw new NotSupportedException($@"{nameof(propertyType.Name)} is not supported. Supported types: 
 {nameof(Int32)}, {nameof(Single)}, {nameof(Double)}, {nameof(Decimal)}, {nameof(DateTime)}, {nameof(String)}");
                     }
 
-                    string cellValue = GetDataFromCell(cells, row.RowIndex.Value, tempNumber);
+                    string cellValue = GetDataFromCell(cells, row.RowIndex.Value, propertyOrder);
                     object parsedValue;
                     try
                     {
-                        parsedValue = Parsers[tempType].parse.Invoke(cellValue);
+                        parsedValue = Parsers[propertyType].parse.Invoke(cellValue);
                     }
                     catch
                     {
-                        parsedValue = Parsers[tempType].defaultValue;
+                        parsedValue = Parsers[propertyType].defaultValue;
                     }
                     property.SetValue(item, parsedValue, null);
                 }
