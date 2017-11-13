@@ -21,12 +21,11 @@ namespace OpenXmlFun.Excel.Parser
         // ReSharper disable once StaticMemberInGenericType
         private static readonly string[] ExcelColumnNames = new string[Alphabet.Length * 2];
 
-        private readonly SpreadsheetDocument _spreadsheetDocument;
-        private readonly Worksheet _worksheet;
-        private readonly SharedStringTable _ssTable;
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly string NotSupportedExceptionMessage;
 
         // ReSharper disable once StaticMemberInGenericType
-        private static readonly Dictionary<Type, (Func<string, object> parse, object defaultValue)> Parsers = 
+        private static readonly Dictionary<Type, (Func<string, object> parse, object defaultValue)> Parsers =
             new Dictionary<Type, (Func<string, object> parse, object defaultValue)>
             {
                 {typeof(int), (str => (int)double.Parse(str, CultureInfo.InvariantCulture), 0)},
@@ -36,6 +35,10 @@ namespace OpenXmlFun.Excel.Parser
                 {typeof(DateTime), (str => DateTime.Parse(str, CultureInfo.InvariantCulture), DateTime.MinValue)},
                 {typeof(string), (str => str, string.Empty)}
             };
+
+        private readonly SpreadsheetDocument _spreadsheetDocument;
+        private readonly Worksheet _worksheet;
+        private readonly SharedStringTable _ssTable;
 
         static ExcelParser()
         {
@@ -48,6 +51,8 @@ namespace OpenXmlFun.Excel.Parser
             {
                 ExcelColumnNames[i + Alphabet.Length] = $"{Alphabet[0]}{Alphabet[i]}";
             }
+
+            NotSupportedExceptionMessage = $@"Supported types: {string.Join(", ", Parsers.Keys.Select(x => x.Name))}.";
         }
 
         public ExcelParser(string filePath)
@@ -105,8 +110,7 @@ namespace OpenXmlFun.Excel.Parser
                     Type propertyType = property.PropertyType;
                     if (!Parsers.ContainsKey(propertyType))
                     {
-                        throw new NotSupportedException($@"{nameof(propertyType.Name)} is not supported. Supported types: 
-{nameof(Int32)}, {nameof(Single)}, {nameof(Double)}, {nameof(Decimal)}, {nameof(DateTime)}, {nameof(String)}");
+                        throw new NotSupportedException($"{propertyType.Name} is not supported. " + NotSupportedExceptionMessage);
                     }
 
                     string cellValue = GetDataFromCell(cells, row.RowIndex.Value, propertyOrder);
