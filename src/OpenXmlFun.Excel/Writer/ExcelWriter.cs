@@ -6,6 +6,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using OpenXmlFun.Excel.Writer;
+// ReSharper disable PossiblyMistakenUseOfParamsMethod
 
 namespace OpenXmlFun.Excel.Writer
 {
@@ -22,8 +23,30 @@ namespace OpenXmlFun.Excel.Writer
         private SheetData _sheetData;
         Worksheet _worksheet;
 
-        private Dictionary<string, uint> _cellFormatDictionary;
-        private string[] _rowNames;
+        private static readonly Dictionary<string, uint> CellFormatDictionary = new Dictionary<string, uint>
+        {
+            {"01", 1},
+            {"02", 2},
+            {"03", 3},
+            {"11", 4},
+            {"12", 5},
+            {"13", 6},
+            {"21", 7},
+            {"22", 8},
+            {"23", 9},
+            {"31", 10},
+            {"32", 11},
+            {"33", 12},
+            {"41", 13},
+            {"42", 14},
+            {"43", 15},
+            {"51", 16},
+            {"52", 17},
+            {"53", 18},
+            {"04", 19},
+            {"05", 16}
+        };
+
         private int _startIndex = 1;
         private int _sheetId;
 
@@ -60,7 +83,6 @@ namespace OpenXmlFun.Excel.Writer
 
             SetWidths(columnWidths);
 
-
             worksheetPart.Worksheet = _worksheet;
             worksheetPart.Worksheet.Append(new SheetData());
 
@@ -85,6 +107,7 @@ namespace OpenXmlFun.Excel.Writer
                 _spreadsheetDocument.WorkbookPart.WorkbookStylesPart.Stylesheet = CreateStylesheet();
             }
         }
+
         public void AddAcrossHeader(params string[] columnNames)
         {
             var row = new Row { RowIndex = (UInt32)_startIndex };
@@ -98,10 +121,6 @@ namespace OpenXmlFun.Excel.Writer
             _startIndex++;
         }
 
-        public void AddDownHeader(params string[] rowNames)
-        {
-            _rowNames = rowNames;
-        }
         public void AddRow(ExcelColors color, params ExcelCell[] data)
         {
             Func<ExcelColors, ExcelCell, int, string, Cell> newCell = (cellcolor, cellData, index, headerLetter) =>
@@ -137,19 +156,9 @@ namespace OpenXmlFun.Excel.Writer
                     return AddCell(cellData, index, headerLetter, cellcolor, type);
                 };
             var row = new Row { RowIndex = (UInt32)_startIndex };
-
-            var rowShift = 0;
-            if (_rowNames != null)
-            {
-                rowShift = _rowNames.Length;
-                for (var rowNameIndex = 0; rowNameIndex < rowShift; rowNameIndex++)
-                {
-                    row.AppendChild(AddCell(new ExcelCell { Text = _rowNames[rowNameIndex] }, _startIndex, ExcelColumnNames[rowNameIndex], type: ExcelDataTypes.Header));
-                }
-            }
             for (int dataItemIndex = 0; dataItemIndex < data.Length; dataItemIndex++)
             {
-                row.AppendChild(newCell(data[dataItemIndex].Color == 0 ? color : data[dataItemIndex].Color, data[dataItemIndex], _startIndex, ExcelColumnNames[dataItemIndex + rowShift]));
+                row.AppendChild(newCell(data[dataItemIndex].Color == 0 ? color : data[dataItemIndex].Color, data[dataItemIndex], _startIndex, ExcelColumnNames[dataItemIndex]));
             }
 
             _sheetData.AppendChild(row);
@@ -169,7 +178,7 @@ namespace OpenXmlFun.Excel.Writer
                         DataType = CellValues.Number,
                         CellReference = header + index.ToString(),
                         CellValue = new CellValue() { Text = text.Text.ToString() },
-                        StyleIndex = _cellFormatDictionary[((int)color).ToString() + ((int)type).ToString()]
+                        StyleIndex = CellFormatDictionary[((int)color).ToString() + ((int)type).ToString()]
                     };
                     break;
                 case ExcelDataTypes.Strike:
@@ -177,7 +186,7 @@ namespace OpenXmlFun.Excel.Writer
                     {
                         DataType = CellValues.InlineString,
                         CellReference = header + index.ToString(),
-                        StyleIndex = _cellFormatDictionary[((int)color).ToString() + ((int)type).ToString()]
+                        StyleIndex = CellFormatDictionary[((int)color).ToString() + ((int)type).ToString()]
                     };
                     if (string.IsNullOrEmpty(text.Hyperlink))
                         cell.InlineString = new InlineString() { Text = new Text(text.Text.ToString()) };
@@ -188,7 +197,7 @@ namespace OpenXmlFun.Excel.Writer
                     {
                         DataType = CellValues.InlineString,
                         CellReference = header + index.ToString(),
-                        StyleIndex = _cellFormatDictionary[((int)color).ToString() + ((int)type).ToString()]
+                        StyleIndex = CellFormatDictionary[((int)color).ToString() + ((int)type).ToString()]
                     };
 
                     if (string.IsNullOrEmpty(text.Hyperlink))
@@ -216,17 +225,31 @@ namespace OpenXmlFun.Excel.Writer
 
         private void SetWidths(params double[] columnWidths)
         {
-            Columns customColumns = new Columns();
-            if (columnWidths != null)
+            if (columnWidths == null || columnWidths.Length == 0)
             {
-                for (uint columnIndex = 0; columnIndex < columnWidths.Length; columnIndex++)
+                return;
+            }
+
+            Columns customColumns = new Columns();
+            for (uint columnIndex = 0; columnIndex < columnWidths.Length; columnIndex++)
+            {
+                customColumns.Append(new Column
                 {
-                    customColumns.Append(new Column() { Min = new UInt32Value(columnIndex + 1), Max = new UInt32Value(columnIndex + 1), Width = new DoubleValue(columnWidths[columnIndex]), CustomWidth = true });
-                }
+                    Min = new UInt32Value(columnIndex + 1),
+                    Max = new UInt32Value(columnIndex + 1),
+                    Width = new DoubleValue(columnWidths[columnIndex]),
+                    CustomWidth = true
+                });
             }
             for (uint columnIndex = (uint)columnWidths.Length; columnIndex < columnWidths.Length + 25; columnIndex++)
             {
-                customColumns.Append(new Column() { Min = new UInt32Value(columnIndex + 1), Max = new UInt32Value(columnIndex + 1), Width = new DoubleValue(DefaultColumnWidth), CustomWidth = true });
+                customColumns.Append(new Column
+                {
+                    Min = new UInt32Value(columnIndex + 1),
+                    Max = new UInt32Value(columnIndex + 1),
+                    Width = new DoubleValue(DefaultColumnWidth),
+                    CustomWidth = true
+                });
             }
             _worksheet.Append(customColumns);
         }
@@ -620,30 +643,6 @@ namespace OpenXmlFun.Excel.Writer
             });
             #endregion
             #endregion
-
-            _cellFormatDictionary = new Dictionary<string, uint>
-        {
-            {"01", 1},
-            {"02", 2},
-            {"03", 3},
-            {"11", 4},
-            {"12", 5},
-            {"13", 6},
-            {"21", 7},
-            {"22", 8},
-            {"23", 9},
-            {"31", 10},
-            {"32", 11},
-            {"33", 12},
-            {"41", 13},
-            {"42", 14},
-            {"43", 15},
-            {"51", 16},
-            {"52", 17},
-            {"53", 18},
-            {"04", 19},
-            {"05", 16}
-        };
 
             numFormats.Count = (uint)numFormats.ChildElements.Count;
             cellFormats.Count = (uint)cellFormats.ChildElements.Count;
