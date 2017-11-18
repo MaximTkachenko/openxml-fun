@@ -24,19 +24,38 @@ namespace OpenXmlFun.Excel.Writer
 
         private Dictionary<string, uint> _cellFormatDictionary;
         private string[] _rowNames;
-        private string _filePath;
         private int _startIndex = 1;
         private int _sheetId;
-        private readonly string[] _headerLetters = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ", "BA", "BB", "BC", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BK", "BL", "BM", "BN", "BO", "BP", "BQ", "BR", "BS", "BT", "BU", "BV", "BW", "BX", "BY", "BZ" };
 
-        private int _indexe = 0;
+        private const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly string[] ExcelColumnNames = new string[Alphabet.Length * 2];
+
+        static ExcelWriter()
+        {
+            for (int i = 0; i < Alphabet.Length; i++)
+            {
+                ExcelColumnNames[i] = Alphabet[i].ToString();
+            }
+
+            for (int i = 0; i < Alphabet.Length; i++)
+            {
+                ExcelColumnNames[i + Alphabet.Length] = $"{Alphabet[0]}{Alphabet[i]}";
+            }
+        }
+
+        public ExcelWriter(string filePath)
+        {
+            _spreadsheetDocument = SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook);
+            _spreadsheetDocument.AddWorkbookPart();
+            _spreadsheetDocument.WorkbookPart.Workbook = new Workbook();
+        }
 
         public void AddSheet(string sheetName, params double[] columnWidths)
         {
             var worksheetPart = _spreadsheetDocument.WorkbookPart.AddNewPart<WorksheetPart>();
 
-            if (_worksheet != null)
-                _worksheet.Save();
+            _worksheet?.Save();
             _worksheet = new Worksheet();
 
             SetWidths(columnWidths);
@@ -70,10 +89,10 @@ namespace OpenXmlFun.Excel.Writer
         {
             var row = new Row { RowIndex = (UInt32)_startIndex };
             for (int dataItemIndex = 0; dataItemIndex < columnNames.Length; dataItemIndex++)
-                row.AppendChild(AddCell(new ExcelCell { Text = columnNames[dataItemIndex] }, _startIndex, _headerLetters[dataItemIndex], type: ExcelDataTypes.Header));
+                row.AppendChild(AddCell(new ExcelCell { Text = columnNames[dataItemIndex] }, _startIndex, ExcelColumnNames[dataItemIndex], type: ExcelDataTypes.Header));
             _sheetData.AppendChild(row);
 
-            var autoFilter = new AutoFilter { Reference = string.Format("A1:{0}1", _headerLetters[columnNames.Length - 1]) };
+            var autoFilter = new AutoFilter { Reference = string.Format("A1:{0}1", ExcelColumnNames[columnNames.Length - 1]) };
             _worksheet.Append(autoFilter);
 
             _startIndex++;
@@ -87,12 +106,6 @@ namespace OpenXmlFun.Excel.Writer
         {
             Func<ExcelColors, ExcelCell, int, string, Cell> newCell = (cellcolor, cellData, index, headerLetter) =>
                 {
-                    if (cellData.IsStrike)
-                    {
-                        var g = 0;
-                        g++;
-                    }
-
                     if (cellData == null)
                         cellData = new ExcelCell { Text = string.Empty };
                     if (cellData.Text == null)
@@ -131,20 +144,16 @@ namespace OpenXmlFun.Excel.Writer
                 rowShift = _rowNames.Length;
                 for (var rowNameIndex = 0; rowNameIndex < rowShift; rowNameIndex++)
                 {
-                    row.AppendChild(AddCell(new ExcelCell { Text = _rowNames[rowNameIndex] }, _startIndex, _headerLetters[rowNameIndex], type: ExcelDataTypes.Header));
+                    row.AppendChild(AddCell(new ExcelCell { Text = _rowNames[rowNameIndex] }, _startIndex, ExcelColumnNames[rowNameIndex], type: ExcelDataTypes.Header));
                 }
             }
             for (int dataItemIndex = 0; dataItemIndex < data.Length; dataItemIndex++)
             {
-                row.AppendChild(newCell(data[dataItemIndex].Color == 0 ? color : data[dataItemIndex].Color, data[dataItemIndex], _startIndex, _headerLetters[dataItemIndex + rowShift]));
+                row.AppendChild(newCell(data[dataItemIndex].Color == 0 ? color : data[dataItemIndex].Color, data[dataItemIndex], _startIndex, ExcelColumnNames[dataItemIndex + rowShift]));
             }
 
             _sheetData.AppendChild(row);
             _startIndex++;
-        }
-        public void Dispose()
-        {
-            _spreadsheetDocument.Dispose();
         }
 
         private Cell AddCell(ExcelCell text, int index, string header, ExcelColors color = ExcelColors.Black, ExcelDataTypes type = ExcelDataTypes.Text)
@@ -152,11 +161,6 @@ namespace OpenXmlFun.Excel.Writer
             Cell cell = null;
             type = text.IsStrike ? ExcelDataTypes.Strike : type;
 
-            if (text.IsStrike)
-            {
-                var t = 0;
-                t++;
-            }
             switch (type)
             {
                 case ExcelDataTypes.Money:
@@ -207,7 +211,9 @@ namespace OpenXmlFun.Excel.Writer
 
 
             return cell;
+
         }
+
         private void SetWidths(params double[] columnWidths)
         {
             Columns customColumns = new Columns();
@@ -224,6 +230,7 @@ namespace OpenXmlFun.Excel.Writer
             }
             _worksheet.Append(customColumns);
         }
+
         private Stylesheet CreateStylesheet()
         {
             Stylesheet styleSheet = new Stylesheet();
@@ -659,12 +666,9 @@ namespace OpenXmlFun.Excel.Writer
             return regex.Replace(Math.Round(dec, 2).ToString("N", new System.Globalization.CultureInfo("ru-RU")).Replace(',', '.'), string.Empty);
         }
 
-        public ExcelWriter(string filePath)
+        public void Dispose()
         {
-            _filePath = filePath;
-            _spreadsheetDocument = SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook);
-            _spreadsheetDocument.AddWorkbookPart();
-            _spreadsheetDocument.WorkbookPart.Workbook = new Workbook();
+            _spreadsheetDocument.Dispose();
         }
     }
 }
