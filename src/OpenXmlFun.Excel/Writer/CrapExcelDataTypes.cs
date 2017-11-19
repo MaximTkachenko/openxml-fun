@@ -1,6 +1,6 @@
 ﻿namespace OpenXmlFun.Excel.Writer
 {
-    public enum ExcelDataTypes
+    public enum CrapExcelDataTypes
     {
         Header = 1,
         Text = 2,

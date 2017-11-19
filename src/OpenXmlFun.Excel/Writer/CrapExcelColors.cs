@@ -1,6 +1,6 @@
 ﻿namespace OpenXmlFun.Excel.Writer
 {
-    public enum ExcelColors
+    public enum CrapExcelColors
     {
         Black = 0,
         Red = 1,

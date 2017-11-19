@@ -17,12 +17,37 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
             string filePath = Path.Combine(TestContext.CurrentContext.TestDirectory, 
                 $@"{DateTime.Now.ToString(CultureInfo.InvariantCulture).GetSafeFileName()}.xlsx");
 
-            using (var writer = new ExcelWriter(filePath))
+            using (var writer = new CrapExcelWriter(filePath))
             {
                 writer.AddSheet("Договоры");
                 writer.AddAcrossHeader("text", "datetime", "money");
-                writer.AddRow(ExcelColors.Black, 
-                    new[] {new ExcelCell{ Text = "some text"}, new ExcelCell { Text = DateTime.Now }, new ExcelCell { Text = 555.77M } });
+                writer.AddRow(CrapExcelColors.Black, new[]
+                {
+                    new CrapExcelCell{Value = "some text"},
+                    new CrapExcelCell{ Value = DateTime.Now},
+                    new CrapExcelCell{ Value = 555.77M }
+                });
+            }
+        }
+
+        [Test]
+        public void NewTest()
+        {
+            string filePath = Path.Combine(TestContext.CurrentContext.TestDirectory,
+                $@"{DateTime.Now.ToString(CultureInfo.InvariantCulture).GetSafeFileName()}.xlsx");
+
+            using (var writer = new ExcelWriter(filePath))
+            {
+                writer.CreateSheet("Договоры")
+                    .AddHeader("text", "datetime", "money", "count")
+                    .AddRow(new[]
+                    {
+                        new ExcelCell{Value = "some text"},
+                        new ExcelCell{ Value = DateTime.Now},
+                        new ExcelCell{ Value = 555.77M },
+                        new ExcelCell{ Value = 55 }
+                    })
+                    .Save();
             }
         }
     }
