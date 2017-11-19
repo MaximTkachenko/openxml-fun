@@ -1,4 +1,4 @@
-﻿namespace OpenXmlFun.Excel.Writer
+﻿namespace OpenXmlFun.Excel.Writer.Crap
 {
     public enum CrapExcelColors
     {

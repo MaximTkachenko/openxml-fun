@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using NUnit.Framework;
 using OpenXmlFun.Excel.Writer;
+using OpenXmlFun.Excel.Writer.Crap;
 
 namespace OpenXmlFun.Excel.IntegrationTests.Writer
 {
@@ -38,16 +39,24 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
 
             using (var writer = new ExcelWriter(filePath))
             {
-                writer.CreateSheet("Договоры")
-                    .AddHeader("text", "datetime", "money", "count")
+                writer.AddSheet("Договоры_1", 20, 20, 20, 20)
+                    .AddHeader("text_1", "datetime_1", "money_1", "count_1")
                     .AddRow(new[]
                     {
-                        new ExcelCell{Value = "some text"},
+                        new ExcelCell{Value = "some text", Hyperlink = "http://google.com"},
                         new ExcelCell{ Value = DateTime.Now},
                         new ExcelCell{ Value = 555.77M },
                         new ExcelCell{ Value = 55 }
-                    })
-                    .Save();
+                    });
+                writer.AddSheet("Договоры_2", 20, 20, 20, 20)
+                    .AddHeader("text_2", "datetime_2", "money_2", "count_2")
+                    .AddRow(new[]
+                    {
+                        new ExcelCell{Value = "hi i'm here"},
+                        new ExcelCell{ Value = DateTime.UtcNow},
+                        new ExcelCell{ Value = 222.88M },
+                        new ExcelCell{ Value = 1277 }
+                    });
             }
         }
     }

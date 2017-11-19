@@ -8,7 +8,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using OpenXmlFun.Excel.Writer;
 // ReSharper disable PossiblyMistakenUseOfParamsMethod
 
-namespace OpenXmlFun.Excel.Writer
+namespace OpenXmlFun.Excel.Writer.Crap
 {
     //todo loks like shit, need rewrite with good api
     public class CrapExcelWriter : IDisposable
