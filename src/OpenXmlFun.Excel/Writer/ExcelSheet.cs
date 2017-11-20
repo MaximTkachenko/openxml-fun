@@ -13,6 +13,7 @@ namespace OpenXmlFun.Excel.Writer
     {
         private readonly Worksheet _sheet;
         private readonly SheetData _sheetData;
+        private readonly ExcelStylesheetProvider _excelStylesheetProvider;
         private int _rowIndex = 1;
 
         private const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -68,10 +69,11 @@ namespace OpenXmlFun.Excel.Writer
             }
         }
 
-        internal ExcelSheet(WorksheetPart sheetPart, double[] columnWidths)
+        internal ExcelSheet(WorksheetPart sheetPart, ExcelStylesheetProvider excelStylesheetProvider, double[] columnWidths)
         {
             _sheet = sheetPart.Worksheet;
             _sheetData = sheetPart.Worksheet.GetFirstChild<SheetData>();
+            _excelStylesheetProvider = excelStylesheetProvider;
 
             ApplyColumnWidths(columnWidths);
         }

@@ -17,6 +17,7 @@ namespace OpenXmlFun.Excel.Writer
     {
         private readonly SpreadsheetDocument _spreadsheetDocument;
         private readonly Dictionary<string, ExcelSheet> _sheets;
+        private readonly ExcelStylesheetProvider _excelStylesheetProvider;
 
         public ExcelWriter(string filePath)
         {
@@ -29,6 +30,7 @@ namespace OpenXmlFun.Excel.Writer
             _spreadsheetDocument.WorkbookPart.Workbook = new Workbook();
 
             _sheets = new Dictionary<string, ExcelSheet>();
+            _excelStylesheetProvider = new ExcelStylesheetProvider(true);
         }
 
         public ExcelSheet AddSheet(string name, params double[] columnWidths)
@@ -57,10 +59,10 @@ namespace OpenXmlFun.Excel.Writer
             if (_spreadsheetDocument.WorkbookPart.WorkbookStylesPart == null)
             {
                 _spreadsheetDocument.WorkbookPart.AddNewPart<WorkbookStylesPart>();
-                _spreadsheetDocument.WorkbookPart.WorkbookStylesPart.Stylesheet = CreateStylesheet();
+                _spreadsheetDocument.WorkbookPart.WorkbookStylesPart.Stylesheet = _excelStylesheetProvider.Stylesheet;
             }
 
-            _sheets[name] = new ExcelSheet(worksheetPart, columnWidths);
+            _sheets[name] = new ExcelSheet(worksheetPart, _excelStylesheetProvider, columnWidths);
             return _sheets[name];
         }
 
@@ -101,7 +103,7 @@ namespace OpenXmlFun.Excel.Writer
                     ApplyNumberFormat = true,
                     NumberFormatId = 2,
                     ApplyAlignment = true,
-                    Alignment = new Alignment { WrapText = true }
+                    Alignment = new Alignment { WrapText = true },
                 },
                 //int
                 new CellFormat
