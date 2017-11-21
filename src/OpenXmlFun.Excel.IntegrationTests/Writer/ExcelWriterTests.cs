@@ -53,7 +53,7 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
                     .AddRow(new[]
                     {
                         new ExcelCell{Value = "hi i'm here"},
-                        new ExcelCell{ Value = DateTime.UtcNow},
+                        new ExcelCell{ Value = DateTime.UtcNow, BackgroundColor = ExcelColors.Blue},
                         new ExcelCell{ Value = 222.88M },
                         new ExcelCell{ Value = 1277 }
                     });

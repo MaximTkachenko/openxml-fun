@@ -9,14 +9,14 @@ namespace OpenXmlFun.Excel.Writer
 {
     internal class ExcelStylesheetProvider
     {
-        private static readonly Dictionary<ExcelColors, string> Colors = new Dictionary<ExcelColors, string>
+        private static readonly List<(ExcelColors color, string hex)> Colors = new List<(ExcelColors color, string hex)>
         {
-            { ExcelColors.White, "FFFFFF" },
-            { ExcelColors.Black, "4300FF" },
-            { ExcelColors.Red, "FF003C" },
-            { ExcelColors.Green, "32CD32" },
-            { ExcelColors.Blue, "4300FF" },
-            { ExcelColors.Grey, "AAAAAA" }
+            ( ExcelColors.White, "FFFFFF" ),
+            ( ExcelColors.Black, "003300" ),
+            ( ExcelColors.Red, "FF003C" ),
+            ( ExcelColors.Green, "32CD32" ),
+            ( ExcelColors.Blue, "4300FF" ),
+            ( ExcelColors.Grey, "AAAAAA" )
         };
 
         //list of predefined NumberFormatId values https://github.com/closedxml/closedxml/wiki/NumberFormatId-Lookup-Table
@@ -30,7 +30,7 @@ namespace OpenXmlFun.Excel.Writer
 
         //private static Dictionary<Type, Func<ExcelColors, ExcelColors, bool, bool, >>
 
-        private Dictionary<string, uint> _styles = new Dictionary<string, uint>();
+        private readonly Dictionary<string, uint> _styles = new Dictionary<string, uint>();
 
         public ExcelStylesheetProvider(bool wrapText)
         {
@@ -44,23 +44,25 @@ namespace OpenXmlFun.Excel.Writer
             //default
             Stylesheet.Fills.AppendChild(new Fill());
 
-            foreach (var color in Colors.Values)
+            foreach (var color in Colors)
             {
                 Stylesheet.Fonts.AppendChild(new Font
                 {
-                    Color = new Color { Rgb = color }
+                    Color = new Color { Rgb = color.hex }
                 });
                 Stylesheet.Fills.AppendChild(new Fill
                 {
                     PatternFill = new PatternFill(new ForegroundColor
                     {
-                        Rgb = new HexBinaryValue { Value = color }
+                        Rgb = new HexBinaryValue { Value = color.hex }
                     })
                     {
                         PatternType = PatternValues.Solid
                     }
                 });
             }
+            Stylesheet.Fonts.Count = 7;
+            Stylesheet.Fills.Count = 7;
 
             Stylesheet.Borders = new Borders();
             //default
@@ -101,15 +103,21 @@ namespace OpenXmlFun.Excel.Writer
                 },
                 DiagonalBorder = new DiagonalBorder()
             });
+            Stylesheet.Borders.Count = 2;
 
             Stylesheet.CellFormats = new CellFormats();
             //default
             Stylesheet.CellFormats.AppendChild(new CellFormat());
 
-            foreach (var fontColorKey in Colors)
+            uint fontIndex = 0;
+            uint csIndex = 0;
+            foreach (var fontColor in Colors)
             {
-                foreach (var backgroundColorKey in Colors)
+                fontIndex++;
+                uint fillIndex = 0;
+                foreach (var backgroundColor in Colors)
                 {
+                    fillIndex++;
                     foreach (var format in Formats)
                     {
                         Stylesheet.CellFormats.AppendChild(new CellFormat
@@ -121,13 +129,16 @@ namespace OpenXmlFun.Excel.Writer
                             ApplyBorder = true,
                             BorderId = 1,
                             ApplyFont = true,
-                            FontId = 1,
+                            FontId = fontIndex,
                             ApplyFill = true,
-                            FillId = 1
+                            FillId = fillIndex
                         });
+                        csIndex++;
+                        _styles[GetKey(format.Key, fontColor.color, backgroundColor.color, false, false)] = csIndex;
                     }
                 }
             }
+            Stylesheet.CellFormats.Count = 145;
         }
 
         public Stylesheet Stylesheet { get; }

@@ -4,6 +4,12 @@ namespace OpenXmlFun.Excel.Writer
 {
     public class ExcelCell
     {
+        public ExcelCell()
+        {
+            FontColor = ExcelColors.Black;
+            BackgroundColor = ExcelColors.White;
+        }
+
         public Object Value { get; set; }
         public string Formula { get; set; }
         public bool IsStroked { get; set; }

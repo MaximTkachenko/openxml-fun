@@ -66,57 +66,6 @@ namespace OpenXmlFun.Excel.Writer
             return _sheets[name];
         }
 
-        /// <summary>
-        /// List of predefined NumberFormatId values https://github.com/closedxml/closedxml/wiki/NumberFormatId-Lookup-Table
-        /// </summary>
-        /// <returns></returns>
-        private Stylesheet CreateStylesheet()
-        {
-            var styleSheet = new Stylesheet();
-            styleSheet.CellFormats = new CellFormats
-            (
-                //default
-                new CellFormat
-                {
-                    ApplyAlignment = true,
-                    Alignment = new Alignment { WrapText = true }
-                },
-                //date
-                new CellFormat
-                {
-                    ApplyNumberFormat = true,
-                    NumberFormatId = 14,
-                    ApplyAlignment = true,
-                    Alignment = new Alignment { WrapText = true }
-                },
-                //text
-                new CellFormat
-                {
-                    ApplyNumberFormat = true,
-                    NumberFormatId = 49,
-                    ApplyAlignment = true,
-                    Alignment = new Alignment { WrapText = true }
-                },
-                //decimal
-                new CellFormat
-                {
-                    ApplyNumberFormat = true,
-                    NumberFormatId = 2,
-                    ApplyAlignment = true,
-                    Alignment = new Alignment { WrapText = true },
-                },
-                //int
-                new CellFormat
-                {
-                    ApplyNumberFormat = true,
-                    NumberFormatId = 1,
-                    ApplyAlignment = true,
-                    Alignment = new Alignment { WrapText = true }
-                }
-            );
-            return styleSheet;
-        }
-
         public void Dispose()
         {
             _spreadsheetDocument.Dispose();

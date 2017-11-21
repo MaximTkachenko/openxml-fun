@@ -26,32 +26,28 @@ namespace OpenXmlFun.Excel.Writer
                 typeof(int), value => new Cell
                 {
                     DataType = CellValues.Number,
-                    CellValue = new CellValue(value.ToString()),
-                    StyleIndex = 4
+                    CellValue = new CellValue(value.ToString())
                 }
             },
             {
                 typeof(decimal), value => new Cell
                 {
                     DataType = CellValues.Number,
-                    CellValue = new CellValue(value.ToString()),
-                    StyleIndex = 3
+                    CellValue = new CellValue(value.ToString())
                 }
             },
             {
                 typeof(DateTime), value => new Cell
                 {
                     DataType = CellValues.Number,
-                    CellValue = new CellValue(((DateTime)value).ToOADate().ToString(CultureInfo.InvariantCulture)),
-                    StyleIndex = 1
+                    CellValue = new CellValue(((DateTime)value).ToOADate().ToString(CultureInfo.InvariantCulture))
                 }
             },
             {
                 typeof(string), value => new Cell
                 {
                     DataType = CellValues.String,
-                    CellValue = new CellValue(value.ToString()),
-                    StyleIndex = 2
+                    CellValue = new CellValue(value.ToString())
                 }
             }
         };
@@ -80,7 +76,7 @@ namespace OpenXmlFun.Excel.Writer
 
         public ExcelSheet AddHeader(params string[] columnNames)
         {
-            return AddRow(columnNames.Select(cn => new ExcelCell { Value = cn }).ToArray());
+            return AddRow(columnNames.Select(cn => new ExcelCell { Value = cn, FontColor = ExcelColors.White, BackgroundColor = ExcelColors.Black}).ToArray());
         }
 
         public ExcelSheet AddRow(params ExcelCell[] cells)
@@ -103,29 +99,30 @@ namespace OpenXmlFun.Excel.Writer
             return this;
         }
 
-        private Cell CreateCell(ExcelCell sourceSell, int index)
+        private Cell CreateCell(ExcelCell sourceCell, int index)
         {
             Cell cell;
-            if (CellFactories.TryGetValue(sourceSell.Value.GetType(), out Func<object, Cell> factory))
+            if (CellFactories.TryGetValue(sourceCell.Value.GetType(), out Func<object, Cell> factory))
             {
-                cell = factory.Invoke(sourceSell.Value);
+                cell = factory.Invoke(sourceCell.Value);
+                cell.StyleIndex = _excelStylesheetProvider.GetStyleId(sourceCell);
             }
             else
             {
                 cell = new Cell
                 {
                     DataType = CellValues.String,
-                    CellValue = new CellValue(sourceSell.Value.ToString()),
+                    CellValue = new CellValue(sourceCell.Value.ToString()),
                     StyleIndex = 2
                 };
             }
             cell.CellReference = $"{ExcelColumnNames[index]}{_rowIndex}";
-            if (!string.IsNullOrWhiteSpace(sourceSell.Hyperlink))
+            if (!string.IsNullOrWhiteSpace(sourceCell.Hyperlink))
             {
                 cell.CellFormula = new CellFormula
                 {
                     Space = SpaceProcessingModeValues.Preserve,
-                    Text = $@"HYPERLINK(""{sourceSell.Hyperlink}"", ""{sourceSell.Value.ToString()}"")"
+                    Text = $@"HYPERLINK(""{sourceCell.Hyperlink}"", ""{sourceCell.Value.ToString()}"")"
                 };
             }
             return cell;
