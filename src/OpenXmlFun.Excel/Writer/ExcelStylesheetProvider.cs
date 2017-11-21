@@ -8,14 +8,14 @@ namespace OpenXmlFun.Excel.Writer
 {
     internal class ExcelStylesheetProvider
     {
-        private static readonly List<(ExcelColors color, string hex)> Colors = new List<(ExcelColors color, string hex)>
+        private static readonly Dictionary<ExcelColors, string> Colors = new Dictionary<ExcelColors, string>
         {
-            ( ExcelColors.White, "FFFFFF" ),
-            ( ExcelColors.Black, "003300" ),
-            ( ExcelColors.Red, "FF003C" ),
-            ( ExcelColors.Green, "32CD32" ),
-            ( ExcelColors.Blue, "4300FF" ),
-            ( ExcelColors.Grey, "AAAAAA" )
+            { ExcelColors.White, "FFFFFF" },
+            { ExcelColors.Black, "003300" },
+            { ExcelColors.Red, "FF003C" },
+            { ExcelColors.Green, "32CD32" },
+            { ExcelColors.Blue, "4300FF" },
+            { ExcelColors.Grey, "AAAAAA" }
         };
 
         //list of predefined NumberFormatId values https://github.com/closedxml/closedxml/wiki/NumberFormatId-Lookup-Table
@@ -42,17 +42,34 @@ namespace OpenXmlFun.Excel.Writer
             //default Fill
             Stylesheet.Fills.AppendChild(new Fill());
 
-            foreach (var color in Colors)
+            foreach (var color in Colors.Values)
             {
                 Stylesheet.Fonts.AppendChild(new Font
                 {
-                    Color = new Color { Rgb = color.hex }
+                    Color = new Color { Rgb = color }
                 });
+                Stylesheet.Fonts.AppendChild(new Font
+                {
+                    Color = new Color { Rgb = color },
+                    Bold = new Bold()
+                });
+                Stylesheet.Fonts.AppendChild(new Font
+                {
+                    Color = new Color { Rgb = color },
+                    Strike = new Strike()
+                });
+                Stylesheet.Fonts.AppendChild(new Font
+                {
+                    Color = new Color { Rgb = color },
+                    Bold = new Bold(),
+                    Strike = new Strike()
+                });
+
                 Stylesheet.Fills.AppendChild(new Fill
                 {
                     PatternFill = new PatternFill(new ForegroundColor
                     {
-                        Rgb = new HexBinaryValue { Value = color.hex }
+                        Rgb = new HexBinaryValue { Value = color }
                     })
                     {
                         PatternType = PatternValues.Solid
@@ -109,13 +126,23 @@ namespace OpenXmlFun.Excel.Writer
 
             uint fontIndex = 0;
             uint csIndex = 0;
-            foreach (var fontColor in Colors)
+            foreach (Font font in Stylesheet.Fonts)
             {
-                fontIndex++;
-                uint fillIndex = 0;
-                foreach (var backgroundColor in Colors)
+                if (fontIndex == 0)
                 {
-                    fillIndex++;
+                    fontIndex++;
+                    continue;
+                }
+
+                uint fillIndex = 0;
+                foreach (Fill fill in Stylesheet.Fills)
+                {
+                    if (fillIndex == 0)
+                    {
+                        fillIndex++;
+                        continue;
+                    }
+
                     foreach (var format in Formats)
                     {
                         Stylesheet.CellFormats.AppendChild(new CellFormat
@@ -133,9 +160,17 @@ namespace OpenXmlFun.Excel.Writer
                         });
 
                         csIndex++;
-                        _styles[GetKey(format.Key, fontColor.color, backgroundColor.color, false, false)] = csIndex;
+                        _styles[GetKey(format.Key, 
+                            font.Color.Rgb, 
+                            fill.PatternFill.ForegroundColor.Rgb, 
+                            font.Bold != null, 
+                            font.Strike != null)] = csIndex;
                     }
+
+                    fillIndex++;
                 }
+
+                fontIndex++;
             }
             Stylesheet.CellFormats.Count = csIndex + 1;
         }
@@ -149,12 +184,16 @@ namespace OpenXmlFun.Excel.Writer
 
         public uint GetStyleId(ExcelCell cell)
         {
-            return _styles[GetKey(cell.Value.GetType(), cell.FontColor, cell.BackgroundColor, cell.IsBold, cell.IsStroked)];
+            return _styles[GetKey(cell.Value.GetType(), 
+                Colors[cell.FontColor], 
+                Colors[cell.BackgroundColor], 
+                cell.Bold, 
+                cell.Strike)];
         }
 
-        private string GetKey(Type type, ExcelColors fontColor, ExcelColors backgroundColor, bool isBold, bool isStroked)
+        private string GetKey(Type type, string fontColorHex, string backgroundColorHex, bool isBold, bool isStroked)
         {
-            return $"{type.Name}:{fontColor}:{backgroundColor}:{isBold}:{isStroked}";
+            return $"{type.Name}:{fontColorHex}:{backgroundColorHex}:{isBold}:{isStroked}";
         }
     }
 }

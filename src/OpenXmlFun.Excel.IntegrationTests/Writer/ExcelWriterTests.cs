@@ -44,7 +44,7 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
                     .AddRow(new[]
                     {
                         new ExcelCell{Value = "some text", Hyperlink = "http://google.com"},
-                        new ExcelCell{ Value = DateTime.Now},
+                        new ExcelCell{ Value = DateTime.Now, Bold = true, Strike = true, FontColor = ExcelColors.Grey},
                         new ExcelCell{ Value = 555.77M },
                         new ExcelCell{ Value = 55 }
                     });
@@ -52,7 +52,7 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
                     .AddHeader("text_2", "datetime_2", "money_2", "count_2")
                     .AddRow(new[]
                     {
-                        new ExcelCell{Value = "hi i'm here"},
+                        new ExcelCell{Value = "hi i'm here", Bold = true},
                         new ExcelCell{ Value = DateTime.UtcNow, BackgroundColor = ExcelColors.Blue},
                         new ExcelCell{ Value = 222.88M },
                         new ExcelCell{ Value = 1277 }

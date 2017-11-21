@@ -76,7 +76,13 @@ namespace OpenXmlFun.Excel.Writer
 
         public ExcelSheet AddHeader(params string[] columnNames)
         {
-            return AddRow(columnNames.Select(cn => new ExcelCell { Value = cn, FontColor = ExcelColors.White, BackgroundColor = ExcelColors.Black}).ToArray());
+            return AddRow(columnNames.Select(cn => new ExcelCell
+            {
+                Value = cn,
+                Bold = true,
+                FontColor = ExcelColors.White,
+                BackgroundColor = ExcelColors.Black
+            }).ToArray());
         }
 
         public ExcelSheet AddRow(params ExcelCell[] cells)
