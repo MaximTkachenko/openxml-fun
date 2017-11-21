@@ -19,7 +19,7 @@ namespace OpenXmlFun.Excel.Writer
         private readonly Dictionary<string, ExcelSheet> _sheets;
         private readonly ExcelStylesheetProvider _excelStylesheetProvider;
 
-        public ExcelWriter(string filePath)
+        public ExcelWriter(string filePath, bool wrapText = true)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
@@ -30,11 +30,16 @@ namespace OpenXmlFun.Excel.Writer
             _spreadsheetDocument.WorkbookPart.Workbook = new Workbook();
 
             _sheets = new Dictionary<string, ExcelSheet>();
-            _excelStylesheetProvider = new ExcelStylesheetProvider(true);
+            _excelStylesheetProvider = new ExcelStylesheetProvider(wrapText);
         }
 
         public ExcelSheet AddSheet(string name, params double[] columnWidths)
         {
+            if (_sheets.ContainsKey(name))
+            {
+                throw new InvalidOperationException("[{name}] sheet already exists.");
+            }
+
             foreach (var key in _sheets.Keys)
             {
                 _sheets[key].Save();

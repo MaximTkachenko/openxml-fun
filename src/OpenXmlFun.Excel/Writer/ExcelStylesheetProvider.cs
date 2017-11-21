@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
 // ReSharper disable PossiblyMistakenUseOfParamsMethod
@@ -28,20 +27,19 @@ namespace OpenXmlFun.Excel.Writer
             { typeof(int), 1 }
         };
 
-        //private static Dictionary<Type, Func<ExcelColors, ExcelColors, bool, bool, >>
-
         private readonly Dictionary<string, uint> _styles = new Dictionary<string, uint>();
 
+        //todo support alignment, bold, stroke
         public ExcelStylesheetProvider(bool wrapText)
         {
             Stylesheet = new Stylesheet();
 
             Stylesheet.Fonts = new Fonts();
-            //default
+            //default Font
             Stylesheet.Fonts.AppendChild(new Font());
 
             Stylesheet.Fills = new Fills();
-            //default
+            //default Fill
             Stylesheet.Fills.AppendChild(new Fill());
 
             foreach (var color in Colors)
@@ -61,11 +59,11 @@ namespace OpenXmlFun.Excel.Writer
                     }
                 });
             }
-            Stylesheet.Fonts.Count = 7;
-            Stylesheet.Fills.Count = 7;
+            Stylesheet.Fonts.Count = (uint)(Colors.Count + 1);
+            Stylesheet.Fills.Count = (uint)(Colors.Count + 1);
 
             Stylesheet.Borders = new Borders();
-            //default
+            //default Border
             Stylesheet.Borders.AppendChild(new Border());
             Stylesheet.Borders.Append(new Border
             {
@@ -106,7 +104,7 @@ namespace OpenXmlFun.Excel.Writer
             Stylesheet.Borders.Count = 2;
 
             Stylesheet.CellFormats = new CellFormats();
-            //default
+            //default CellFormat
             Stylesheet.CellFormats.AppendChild(new CellFormat());
 
             uint fontIndex = 0;
@@ -133,15 +131,21 @@ namespace OpenXmlFun.Excel.Writer
                             ApplyFill = true,
                             FillId = fillIndex
                         });
+
                         csIndex++;
                         _styles[GetKey(format.Key, fontColor.color, backgroundColor.color, false, false)] = csIndex;
                     }
                 }
             }
-            Stylesheet.CellFormats.Count = 145;
+            Stylesheet.CellFormats.Count = csIndex + 1;
         }
 
         public Stylesheet Stylesheet { get; }
+
+        public uint GetFormatId(Type type)
+        {
+            return Formats[type];
+        }
 
         public uint GetStyleId(ExcelCell cell)
         {

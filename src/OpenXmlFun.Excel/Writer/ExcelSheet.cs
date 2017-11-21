@@ -47,7 +47,7 @@ namespace OpenXmlFun.Excel.Writer
                 typeof(string), value => new Cell
                 {
                     DataType = CellValues.String,
-                    CellValue = new CellValue(value.ToString())
+                    CellValue = new CellValue((string)value)
                 }
             }
         };
@@ -113,7 +113,7 @@ namespace OpenXmlFun.Excel.Writer
                 {
                     DataType = CellValues.String,
                     CellValue = new CellValue(sourceCell.Value.ToString()),
-                    StyleIndex = 2
+                    StyleIndex = _excelStylesheetProvider.GetFormatId(typeof(string))
                 };
             }
             cell.CellReference = $"{ExcelColumnNames[index]}{_rowIndex}";
