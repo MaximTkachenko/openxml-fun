@@ -41,22 +41,17 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
             {
                 writer.AddSheet("Договоры_1", 20, 20, 20, 20)
                     .AddHeader("text_1", "datetime_1", "money_1", "count_1")
-                    .AddRow(new[]
-                    {
-                        new ExcelCell{Value = "some text", Hyperlink = "http://google.com"},
-                        new ExcelCell{ Value = DateTime.Now, Bold = true, Strike = true, FontColor = ExcelColors.Grey},
+                    .AddRow(new ExcelCell { Value = "some text", Hyperlink = "http://google.com" },
+                        new ExcelCell{ Value = DateTime.Now, Bold = true, Strike = true, FontColor = ExcelColors.Grey },
                         new ExcelCell{ Value = 555.77M },
-                        new ExcelCell{ Value = 55 }
-                    });
+                        new ExcelCell{ Value = 55 });
+
                 writer.AddSheet("Договоры_2", 20, 20, 20, 20)
                     .AddHeader("text_2", "datetime_2", "money_2", "count_2")
-                    .AddRow(new[]
-                    {
-                        new ExcelCell{Value = "hi i'm here", Bold = true},
-                        new ExcelCell{ Value = DateTime.UtcNow, BackgroundColor = ExcelColors.Blue},
+                    .AddRow(new ExcelCell { Value = "hi i'm here", Bold = true },
+                        new ExcelCell{ Value = DateTime.UtcNow, BackgroundColor = ExcelColors.Blue },
                         new ExcelCell{ Value = 222.88M },
-                        new ExcelCell{ Value = 1277 }
-                    });
+                        new ExcelCell{ Value = 1277 });
             }
         }
     }
