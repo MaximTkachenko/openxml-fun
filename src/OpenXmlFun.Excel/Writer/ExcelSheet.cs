@@ -82,7 +82,8 @@ namespace OpenXmlFun.Excel.Writer
         private Cell CreateCell(ExcelCell sourceCell, int index)
         {
             Cell cell;
-            if (SupportedTypesDetails.Data.TryGetValue(sourceCell.Value.GetType(), out (uint NumberFormatId, Func<object, Cell> Factory) typeDetails))
+            if (SupportedTypesDetails.Data.TryGetValue(sourceCell.Value.GetType(), 
+                out (uint NumberFormatId, Func<object, Cell> Factory) typeDetails))
             {
                 cell = typeDetails.Factory.Invoke(sourceCell.Value);
                 cell.StyleIndex = _excelStylesheetProvider.GetStyleId(sourceCell);
@@ -92,8 +93,7 @@ namespace OpenXmlFun.Excel.Writer
                 cell = new Cell
                 {
                     DataType = CellValues.String,
-                    CellValue = new CellValue(sourceCell.Value.ToString()),
-                    StyleIndex = SupportedTypesDetails.Data[typeof(string)].NumberFormatId
+                    CellValue = new CellValue(sourceCell.Value.ToString())
                 };
             }
             cell.CellReference = $"{ExcelColumnNames[index]}{_rowIndex}";

@@ -3,32 +3,12 @@ using System.Globalization;
 using System.IO;
 using NUnit.Framework;
 using OpenXmlFun.Excel.Writer;
-using OpenXmlFun.Excel.Writer.Crap;
 
 namespace OpenXmlFun.Excel.IntegrationTests.Writer
 {
     [TestFixture]
     class ExcelWriterTests
     {
-        [Test]
-        public void Test()
-        {
-            string filePath = Path.Combine(TestContext.CurrentContext.TestDirectory, 
-                $@"{DateTime.Now.ToString(CultureInfo.InvariantCulture).GetSafeFileName()}.xlsx");
-
-            using (var writer = new CrapExcelWriter(filePath))
-            {
-                writer.AddSheet("Договоры");
-                writer.AddAcrossHeader("text", "datetime", "money");
-                writer.AddRow(CrapExcelColors.Black, new[]
-                {
-                    new CrapExcelCell{Value = "some text", IsStrike = true},
-                    new CrapExcelCell{ Value = DateTime.Now},
-                    new CrapExcelCell{ Value = 555.77M }
-                });
-            }
-        }
-
         [Test]
         public void NewTest()
         {
