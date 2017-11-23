@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Text;
 using NUnit.Framework;
 using OpenXmlFun.Excel.Writer;
 using OpenXmlFun.Excel.Writer.Crap;
@@ -24,7 +22,7 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
                 writer.AddAcrossHeader("text", "datetime", "money");
                 writer.AddRow(CrapExcelColors.Black, new[]
                 {
-                    new CrapExcelCell{Value = "some text"},
+                    new CrapExcelCell{Value = "some text", IsStrike = true},
                     new CrapExcelCell{ Value = DateTime.Now},
                     new CrapExcelCell{ Value = 555.77M }
                 });
@@ -36,24 +34,25 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
         {
             string filePath = Path.Combine(TestContext.CurrentContext.TestDirectory,
                 $@"{DateTime.Now.ToString(CultureInfo.InvariantCulture).GetSafeFileName()}.xlsx");
-
+            
             using (var writer = new ExcelWriter(filePath))
             {
                 writer.AddSheet("Договоры_1", 20, 20, 20, 20)
                     .AddHeader("text_1", "datetime_1", "money_1", "count_1")
+                    .AddRow(DateTime.Now, 555.77M, 55)
                     .AddRow(new ExcelCell { Value = "some text", Hyperlink = "http://google.com" },
-                        new ExcelCell{ Value = DateTime.Now, Bold = true, Strike = true, FontColor = ExcelColors.Grey },
-                        new ExcelCell{ Value = 555.77M },
+                        new ExcelCell{ Value = DateTime.Now, Bold = true, Strike = true, FontColor = ExcelColors.Red, BackgroundColor = ExcelColors.Green },
+                        new ExcelCell{ Value = 555.77M, BackgroundColor = ExcelColors.Blue },
                         new ExcelCell{ Value = 55 });
 
                 writer.AddSheet("Договоры_2", 20, 20, 20, 20)
                     .AddHeader("text_2", "datetime_2", "money_2", "count_2")
-                    .AddRow(new ExcelCell { Value = "hi i'm here", Bold = true },
-                        new ExcelCell{ Value = DateTime.UtcNow, BackgroundColor = ExcelColors.Blue },
-                        new ExcelCell{ Value = 222.88M },
+                    .AddRow(new ExcelCell { Value = "hi im here", Bold = true },
+                        new ExcelCell{ Value = DateTime.UtcNow, FontColor = ExcelColors.Red },
+                        new ExcelCell{ Value = 222.88M, FontColor = ExcelColors.Green },
                         new ExcelCell{ Value = 1277 });
             }
-        }
+        }        
     }
 
     internal static class StringExt

@@ -73,6 +73,7 @@ namespace OpenXmlFun.Excel.Writer
 
         public void Dispose()
         {
+            _spreadsheetDocument.Save();
             _spreadsheetDocument.Dispose();
         }
     }

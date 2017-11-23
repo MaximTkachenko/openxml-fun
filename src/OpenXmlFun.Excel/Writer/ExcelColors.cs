@@ -2,11 +2,11 @@
 {
     public enum ExcelColors
     {
-        Black = 0,
-        White = 1,
-        Red = 2,
-        Green = 3,
-        Blue = 4,
-        Grey = 5
+        Black = 1,
+        White = 2,
+        Red = 3,
+        Green = 4,
+        Blue = 5,
+        Grey = 6
     }
 }

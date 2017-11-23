@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
@@ -19,39 +17,7 @@ namespace OpenXmlFun.Excel.Writer
         private const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         // ReSharper disable once StaticMemberInGenericType
         private static readonly string[] ExcelColumnNames = new string[Alphabet.Length * 2];
-
-        private static readonly Dictionary<Type, Func<object, Cell>> CellFactories = new Dictionary<Type, Func<object, Cell>>
-        {
-            {
-                typeof(int), value => new Cell
-                {
-                    DataType = CellValues.Number,
-                    CellValue = new CellValue(value.ToString())
-                }
-            },
-            {
-                typeof(decimal), value => new Cell
-                {
-                    DataType = CellValues.Number,
-                    CellValue = new CellValue(value.ToString())
-                }
-            },
-            {
-                typeof(DateTime), value => new Cell
-                {
-                    DataType = CellValues.Number,
-                    CellValue = new CellValue(((DateTime)value).ToOADate().ToString(CultureInfo.InvariantCulture))
-                }
-            },
-            {
-                typeof(string), value => new Cell
-                {
-                    DataType = CellValues.String,
-                    CellValue = new CellValue((string)value)
-                }
-            }
-        };
-
+        
         static ExcelSheet()
         {
             for (int i = 0; i < Alphabet.Length; i++)
@@ -85,6 +51,14 @@ namespace OpenXmlFun.Excel.Writer
             }).ToArray());
         }
 
+        public ExcelSheet AddRow(params object[] values)
+        {
+            return AddRow(values.Select(v => new ExcelCell
+            {
+                Value = v
+            }).ToArray());
+        }
+
         public ExcelSheet AddRow(params ExcelCell[] cells)
         {
             var row = new Row { RowIndex = (UInt32)_rowIndex };
@@ -108,9 +82,9 @@ namespace OpenXmlFun.Excel.Writer
         private Cell CreateCell(ExcelCell sourceCell, int index)
         {
             Cell cell;
-            if (CellFactories.TryGetValue(sourceCell.Value.GetType(), out Func<object, Cell> factory))
+            if (SupportedTypesDetails.Data.TryGetValue(sourceCell.Value.GetType(), out (uint NumberFormatId, Func<object, Cell> Factory) typeDetails))
             {
-                cell = factory.Invoke(sourceCell.Value);
+                cell = typeDetails.Factory.Invoke(sourceCell.Value);
                 cell.StyleIndex = _excelStylesheetProvider.GetStyleId(sourceCell);
             }
             else
@@ -119,7 +93,7 @@ namespace OpenXmlFun.Excel.Writer
                 {
                     DataType = CellValues.String,
                     CellValue = new CellValue(sourceCell.Value.ToString()),
-                    StyleIndex = _excelStylesheetProvider.GetFormatId(typeof(string))
+                    StyleIndex = SupportedTypesDetails.Data[typeof(string)].NumberFormatId
                 };
             }
             cell.CellReference = $"{ExcelColumnNames[index]}{_rowIndex}";
@@ -133,7 +107,7 @@ namespace OpenXmlFun.Excel.Writer
             }
             return cell;
         }
-
+        
         private void ApplyColumnWidths(double[] columnWidths)
         {
             if (columnWidths == null || columnWidths.Length == 0)
@@ -162,7 +136,7 @@ namespace OpenXmlFun.Excel.Writer
                     CustomWidth = true
                 });
             }
-            _sheet.Append(customColumns);
+            _sheet.InsertAt(customColumns, 0);
         }
     }
 }

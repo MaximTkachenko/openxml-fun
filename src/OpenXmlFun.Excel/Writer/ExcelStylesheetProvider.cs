@@ -11,78 +11,67 @@ namespace OpenXmlFun.Excel.Writer
         private static readonly Dictionary<ExcelColors, string> Colors = new Dictionary<ExcelColors, string>
         {
             { ExcelColors.White, "FFFFFF" },
-            { ExcelColors.Black, "003300" },
+            { ExcelColors.Black, "000000" },
             { ExcelColors.Red, "FF003C" },
             { ExcelColors.Green, "32CD32" },
             { ExcelColors.Blue, "4300FF" },
             { ExcelColors.Grey, "AAAAAA" }
         };
 
-        //list of predefined NumberFormatId values https://github.com/closedxml/closedxml/wiki/NumberFormatId-Lookup-Table
-        private static readonly Dictionary<Type, uint> Formats = new Dictionary<Type, uint>
-        {
-            { typeof(string), 49 },
-            { typeof(DateTime), 14 },
-            { typeof(decimal), 2 },
-            { typeof(int), 1 }
-        };
-
         private readonly Dictionary<string, uint> _styles = new Dictionary<string, uint>();
 
-        //todo support alignment, bold, stroke
+        //todo support alignment - make it dependent on wrapText
+        //todo think about static ctor
         public ExcelStylesheetProvider(bool wrapText)
         {
-            Stylesheet = new Stylesheet();
-
-            Stylesheet.Fonts = new Fonts();
+            var fonts = new Fonts();
             //default Font
-            Stylesheet.Fonts.AppendChild(new Font());
+            fonts.AppendChild(new Font { Color = new Color() });
 
-            Stylesheet.Fills = new Fills();
-            //default Fill
-            Stylesheet.Fills.AppendChild(new Fill());
+            var fills = new Fills();
+            //default Fills
+            fills.AppendChild(new Fill(new PatternFill() { PatternType = PatternValues.None }));
+            fills.AppendChild(new Fill(new PatternFill() { PatternType = PatternValues.Gray125 }));
 
             foreach (var color in Colors.Values)
             {
-                Stylesheet.Fonts.AppendChild(new Font
+                fonts.AppendChild(new Font
                 {
                     Color = new Color { Rgb = color }
                 });
-                Stylesheet.Fonts.AppendChild(new Font
+                fonts.AppendChild(new Font
                 {
                     Color = new Color { Rgb = color },
                     Bold = new Bold()
                 });
-                Stylesheet.Fonts.AppendChild(new Font
+                fonts.AppendChild(new Font
                 {
                     Color = new Color { Rgb = color },
                     Strike = new Strike()
                 });
-                Stylesheet.Fonts.AppendChild(new Font
+                fonts.AppendChild(new Font
                 {
                     Color = new Color { Rgb = color },
                     Bold = new Bold(),
                     Strike = new Strike()
                 });
 
-                Stylesheet.Fills.AppendChild(new Fill
-                {
-                    PatternFill = new PatternFill(new ForegroundColor
+                fills.AppendChild(new Fill
+                (
+                    new PatternFill
                     {
-                        Rgb = new HexBinaryValue { Value = color }
-                    })
-                    {
+                        ForegroundColor = new ForegroundColor { Rgb = color },
                         PatternType = PatternValues.Solid
                     }
-                });
+                ));
             }
-            Stylesheet.Fonts.Count = (uint)(Colors.Count + 1);
-            Stylesheet.Fills.Count = (uint)(Colors.Count + 1);
+            fonts.Count = (uint)fonts.ChildElements.Count;
+            fills.Count = (uint)fills.ChildElements.Count;
 
-            Stylesheet.Borders = new Borders();
+            var borders = new Borders();
             //default Border
-            Stylesheet.Borders.AppendChild(new Border());
-            Stylesheet.Borders.Append(new Border
+            borders.AppendChild(new Border());
+            borders.Append(new Border
             {
                 LeftBorder = new LeftBorder
                 {
@@ -118,37 +107,37 @@ namespace OpenXmlFun.Excel.Writer
                 },
                 DiagonalBorder = new DiagonalBorder()
             });
-            Stylesheet.Borders.Count = 2;
+            borders.Count = (uint)borders.ChildElements.Count;
 
-            Stylesheet.CellFormats = new CellFormats();
+            var cellFormats = new CellFormats();
             //default CellFormat
-            Stylesheet.CellFormats.AppendChild(new CellFormat());
+            cellFormats.AppendChild(new CellFormat { FontId = 0, FillId = 0, BorderId = 0 });
 
             uint fontIndex = 0;
             uint csIndex = 0;
-            foreach (Font font in Stylesheet.Fonts)
+            foreach (Font font in fonts.ChildElements)
             {
-                if (fontIndex == 0)
+                if (fontIndex < 1)
                 {
                     fontIndex++;
                     continue;
                 }
 
                 uint fillIndex = 0;
-                foreach (Fill fill in Stylesheet.Fills)
+                foreach (Fill fill in fills.ChildElements)
                 {
-                    if (fillIndex == 0)
+                    if (fillIndex < 2)
                     {
                         fillIndex++;
                         continue;
                     }
 
-                    foreach (var format in Formats)
+                    foreach (var typeDetails in SupportedTypesDetails.Data)
                     {
-                        Stylesheet.CellFormats.AppendChild(new CellFormat
+                        cellFormats.AppendChild(new CellFormat
                         {
                             ApplyNumberFormat = true,
-                            NumberFormatId = format.Value,
+                            NumberFormatId = typeDetails.Value.NumberFormatId,
                             ApplyAlignment = true,
                             Alignment = new Alignment { WrapText = wrapText },
                             ApplyBorder = true,
@@ -156,13 +145,14 @@ namespace OpenXmlFun.Excel.Writer
                             ApplyFont = true,
                             FontId = fontIndex,
                             ApplyFill = true,
-                            FillId = fillIndex
+                            FillId = fillIndex,
+                            FormatId = 0
                         });
 
                         csIndex++;
-                        _styles[GetKey(format.Key, 
+                        _styles[GetKey(typeDetails.Key, 
                             font.Color.Rgb, 
-                            fill.PatternFill.ForegroundColor.Rgb, 
+                            fill.PatternFill.ForegroundColor.Rgb.Value, 
                             font.Bold != null, 
                             font.Strike != null)] = csIndex;
                     }
@@ -172,15 +162,12 @@ namespace OpenXmlFun.Excel.Writer
 
                 fontIndex++;
             }
-            Stylesheet.CellFormats.Count = csIndex + 1;
+            cellFormats.Count = (uint)cellFormats.ChildElements.Count;
+
+            Stylesheet = new Stylesheet(fonts, fills, borders, cellFormats);
         }
 
         public Stylesheet Stylesheet { get; }
-
-        public uint GetFormatId(Type type)
-        {
-            return Formats[type];
-        }
 
         public uint GetStyleId(ExcelCell cell)
         {
