@@ -12,29 +12,37 @@ namespace OpenXmlFun.Excel.Writer
             new Dictionary<Type, (uint NumberFormatId, Func<object, Cell> Factory, Func<object, bool> IsDefault)>
         {
             { typeof(string),
-                (49, value => new Cell
-                {
-                    DataType = CellValues.String,
-                    CellValue = new CellValue((string)value)
-                }, value => string.IsNullOrWhiteSpace((string)value)) },
+                (49, 
+                    value => new Cell
+                    {
+                        DataType = CellValues.String,
+                        CellValue = new CellValue((string)value)
+                    }, 
+                    value => string.IsNullOrWhiteSpace((string)value)) },
             { typeof(DateTime),
-                (14, value => new Cell
-                {
-                    DataType = CellValues.Number,
-                    CellValue = new CellValue(((DateTime)value).ToOADate().ToString(CultureInfo.InvariantCulture))
-                }, value => (DateTime)value == DateTime.MinValue) },
+                (14, 
+                    value => new Cell
+                    {
+                        DataType = CellValues.Number,
+                        CellValue = new CellValue(((DateTime)value).ToOADate().ToString(CultureInfo.InvariantCulture))
+                    }, 
+                    value => (DateTime)value == DateTime.MinValue) },
             { typeof(decimal),
-                (2, value => new Cell
-                {
-                    DataType = CellValues.Number,
-                    CellValue = new CellValue(((decimal)value).ToString(CultureInfo.InvariantCulture))
-                }, value => (decimal)value == 0M) },
+                (2, 
+                    value => new Cell
+                    {
+                        DataType = CellValues.Number,
+                        CellValue = new CellValue(((decimal)value).ToString(CultureInfo.InvariantCulture))
+                    }, 
+                    value => (decimal)value == 0M) },
             { typeof(int),
-                (1, value => new Cell
-                {
-                    DataType = CellValues.Number,
-                    CellValue = new CellValue(((int)value).ToString(CultureInfo.InvariantCulture))
-                }, value => (int)value == 0) }
+                (1, 
+                    value => new Cell
+                    {
+                        DataType = CellValues.Number,
+                        CellValue = new CellValue(((int)value).ToString(CultureInfo.InvariantCulture))
+                    }, 
+                    value => (int)value == 0) }
         };
     }
 }

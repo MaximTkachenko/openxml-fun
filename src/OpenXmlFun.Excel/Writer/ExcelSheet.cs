@@ -42,7 +42,7 @@ namespace OpenXmlFun.Excel.Writer
 
         public ExcelSheet AddHeader(params string[] columnNames)
         {
-            return AddRow(columnNames.Select(cn => new ExcelCell
+            return AddRow(columnNames?.Select(cn => new ExcelCell
             {
                 Value = cn,
                 Bold = true,
@@ -53,7 +53,7 @@ namespace OpenXmlFun.Excel.Writer
 
         public ExcelSheet AddRow(params object[] values)
         {
-            return AddRow(values.Select(v => new ExcelCell
+            return AddRow(values?.Select(v => new ExcelCell
             {
                 Value = v
             }).ToArray());
@@ -62,9 +62,12 @@ namespace OpenXmlFun.Excel.Writer
         public ExcelSheet AddRow(params ExcelCell[] cells)
         {
             var row = new Row { RowIndex = (UInt32)_rowIndex };
-            for (int i = 0; i < cells.Length; i++)
+            if (cells != null && cells.Length > 0)
             {
-                row.AppendChild(CreateCell(cells[i], i));
+                for (int i = 0; i < cells.Length; i++)
+                {
+                    row.AppendChild(CreateCell(cells[i], i));
+                }
             }
 
             _sheetData.AppendChild(row);

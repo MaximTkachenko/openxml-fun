@@ -20,18 +20,18 @@ namespace OpenXmlFun.Excel.Writer
 
         private readonly Dictionary<string, uint> _styles = new Dictionary<string, uint>();
 
-        //todo support alignment - make it dependent on wrapText
-        //todo think about static ctor
         public ExcelStylesheetProvider(bool wrapText)
         {
             var fonts = new Fonts();
             //default Font
             fonts.AppendChild(new Font { Color = new Color() });
+            uint defaultFontsCount = (uint)fonts.ChildElements.Count;
 
             var fills = new Fills();
             //default Fills
-            fills.AppendChild(new Fill(new PatternFill() { PatternType = PatternValues.None }));
-            fills.AppendChild(new Fill(new PatternFill() { PatternType = PatternValues.Gray125 }));
+            fills.AppendChild(new Fill(new PatternFill { PatternType = PatternValues.None }));
+            fills.AppendChild(new Fill(new PatternFill { PatternType = PatternValues.Gray125 }));
+            uint defaultFillsCount = (uint)fills.ChildElements.Count;
 
             foreach (var color in Colors.Values)
             {
@@ -117,7 +117,7 @@ namespace OpenXmlFun.Excel.Writer
             uint csIndex = 0;
             foreach (Font font in fonts.ChildElements)
             {
-                if (fontIndex < 1)
+                if (fontIndex < defaultFontsCount)
                 {
                     fontIndex++;
                     continue;
@@ -126,7 +126,7 @@ namespace OpenXmlFun.Excel.Writer
                 uint fillIndex = 0;
                 foreach (Fill fill in fills.ChildElements)
                 {
-                    if (fillIndex < 2)
+                    if (fillIndex < defaultFillsCount)
                     {
                         fillIndex++;
                         continue;
