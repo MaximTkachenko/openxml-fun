@@ -27,13 +27,13 @@ namespace OpenXmlFun.Excel.Writer
                 (2, value => new Cell
                 {
                     DataType = CellValues.Number,
-                    CellValue = new CellValue(value.ToString())
+                    CellValue = new CellValue(((decimal)value).ToString(CultureInfo.InvariantCulture))
                 }, value => (decimal)value == 0M) },
             { typeof(int),
                 (1, value => new Cell
                 {
                     DataType = CellValues.Number,
-                    CellValue = new CellValue(value.ToString())
+                    CellValue = new CellValue(((int)value).ToString(CultureInfo.InvariantCulture))
                 }, value => (int)value == 0) }
         };
     }
