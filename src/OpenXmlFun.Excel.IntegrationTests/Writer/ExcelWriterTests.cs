@@ -10,7 +10,7 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
     class ExcelWriterTests
     {
         [Test]
-        public void NewTest()
+        public void BasicTest()
         {
             string filePath = Path.Combine(TestContext.CurrentContext.TestDirectory,
                 $@"{DateTime.Now.ToString(CultureInfo.InvariantCulture).GetSafeFileName()}.xlsx");
