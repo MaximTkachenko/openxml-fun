@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+#if NETFULL
+using System.ValueType;
+#endif
 
 // ReSharper disable PossiblyMistakenUseOfParamsMethod
 
