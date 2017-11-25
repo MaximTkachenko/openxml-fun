@@ -14,12 +14,14 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
         {
             string filePath = Path.Combine(TestContext.CurrentContext.TestDirectory,
                 $@"{DateTime.Now.ToString(CultureInfo.InvariantCulture).GetSafeFileName()}.xlsx");
+
+            DateTime? nullDt = null;
             
             using (var writer = new ExcelWriter(filePath))
             {
                 writer.AddSheet("Договоры_1", 20, 20, 20, 20)
                     .AddHeader("text_1", "datetime_1", "money_1", "count_1")
-                    .AddRow(DateTime.Now, 555.77M, 55)
+                    .AddRow(DateTime.Now, 555.77M, 55, null, nullDt)
                     .AddRow(new ExcelCell { Value = "some text", Hyperlink = "http://google.com" },
                         new ExcelCell{ Value = DateTime.Now, Bold = true, Strike = true, FontColor = ExcelColors.Red, BackgroundColor = ExcelColors.Green },
                         new ExcelCell{ Value = 555.77M, BackgroundColor = ExcelColors.Blue },

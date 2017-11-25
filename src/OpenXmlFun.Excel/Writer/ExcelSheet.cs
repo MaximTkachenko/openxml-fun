@@ -82,18 +82,21 @@ namespace OpenXmlFun.Excel.Writer
         private Cell CreateCell(ExcelCell sourceCell, int index)
         {
             Cell cell;
-            if (SupportedTypesDetails.Data.TryGetValue(sourceCell.Value.GetType(), 
-                out (uint NumberFormatId, Func<object, Cell> Factory) typeDetails))
+            if (sourceCell.Value != null &&
+                SupportedTypesDetails.Data.TryGetValue(sourceCell.Value.GetType(), 
+                    out (uint NumberFormatId, Func<object, Cell> Factory) typeDetails))
             {
                 cell = typeDetails.Factory.Invoke(sourceCell.Value);
                 cell.StyleIndex = _excelStylesheetProvider.GetStyleId(sourceCell);
             }
             else
             {
+                sourceCell.Value = string.Empty;
                 cell = new Cell
                 {
                     DataType = CellValues.String,
-                    CellValue = new CellValue(sourceCell.Value.ToString())
+                    CellValue = new CellValue(string.Empty),
+                    StyleIndex = _excelStylesheetProvider.GetStyleId(sourceCell)
                 };
             }
             cell.CellReference = $"{ExcelColumnNames[index]}{_rowIndex}";
