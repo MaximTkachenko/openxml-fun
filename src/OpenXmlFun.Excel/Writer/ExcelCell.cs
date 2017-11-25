@@ -8,6 +8,7 @@ namespace OpenXmlFun.Excel.Writer
         {
             FontColor = ExcelColors.Black;
             BackgroundColor = ExcelColors.White;
+            EmptyOnDefault = true;
         }
 
         public Object Value { get; set; }
@@ -17,5 +18,6 @@ namespace OpenXmlFun.Excel.Writer
         public ExcelColors FontColor { get; set; }
         public ExcelColors BackgroundColor { get; set; }
         public string Hyperlink { get; set; }
+        public bool EmptyOnDefault { get; set; }
     }
 }

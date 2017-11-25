@@ -84,9 +84,13 @@ namespace OpenXmlFun.Excel.Writer
             Cell cell;
             if (sourceCell.Value != null &&
                 SupportedTypesDetails.Data.TryGetValue(sourceCell.Value.GetType(), 
-                    out (uint NumberFormatId, Func<object, Cell> Factory) typeDetails))
+                    out (uint NumberFormatId, Func<object, Cell> Factory, Func<object, bool> IsDefault) typeDetails))
             {
                 cell = typeDetails.Factory.Invoke(sourceCell.Value);
+                if (typeDetails.IsDefault(sourceCell.Value) && sourceCell.EmptyOnDefault)
+                {
+                    cell.CellValue = new CellValue(string.Empty);
+                }
                 cell.StyleIndex = _excelStylesheetProvider.GetStyleId(sourceCell);
             }
             else
