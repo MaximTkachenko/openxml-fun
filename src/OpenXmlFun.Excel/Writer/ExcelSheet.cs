@@ -90,7 +90,7 @@ namespace OpenXmlFun.Excel.Writer
                     out (uint NumberFormatId, Func<object, Cell> Factory, Func<object, bool> IsDefault) typeDetails))
             {
                 cell = typeDetails.Factory.Invoke(sourceCell.Value);
-                if (typeDetails.IsDefault(sourceCell.Value) && sourceCell.EmptyOnDefault)
+                if (typeDetails.IsDefault.Invoke(sourceCell.Value) && sourceCell.EmptyOnDefault)
                 {
                     cell.CellValue = new CellValue(string.Empty);
                 }
