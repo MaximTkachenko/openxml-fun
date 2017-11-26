@@ -139,7 +139,11 @@ namespace OpenXmlFun.Excel.Writer
                             ApplyNumberFormat = true,
                             NumberFormatId = typeDetails.Value.NumberFormatId,
                             ApplyAlignment = true,
-                            Alignment = new Alignment { WrapText = wrapText },
+                            Alignment = new Alignment
+                            {
+                                Vertical = VerticalAlignmentValues.Top,
+                                WrapText = wrapText
+                            },
                             ApplyBorder = true,
                             BorderId = 1,
                             ApplyFont = true,

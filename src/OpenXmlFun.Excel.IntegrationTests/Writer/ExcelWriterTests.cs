@@ -25,7 +25,7 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
                     .AddRow(DateTime.Now, DateTime.MinValue, 555.77M, 55, null, nullDt, 0M)
                     .AddRow(nullArray)
                     .AddRow(null)
-                    .AddRow(new ExcelCell { Value = @"some /\ text", Hyperlink = @"http://google.com" },
+                    .AddRow(new ExcelCell { Value = @"some /\ text" },
                         new ExcelCell{ Value = DateTime.Now, Bold = true, Strike = true, FontColor = ExcelColors.Red, BackgroundColor = ExcelColors.Green },
                         new ExcelCell{ Value = 555.77M, BackgroundColor = ExcelColors.Blue },
                         new ExcelCell{ Value = 55 });
