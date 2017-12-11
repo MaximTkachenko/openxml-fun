@@ -36,16 +36,11 @@ namespace OpenXmlFun.Excel.Writer
             _excelStylesheetProvider = new ExcelStylesheetProvider(wrapText);
         }
 
-        public ExcelSheet AddSheet(string name, params double[] columnWidths)
+        public ExcelSheet AddSheet(string name)
         {
             if (_sheets.ContainsKey(name))
             {
                 throw new InvalidOperationException("[{name}] sheet already exists.");
-            }
-
-            foreach (var key in _sheets.Keys)
-            {
-                _sheets[key].Save();
             }
 
             var worksheetPart = _spreadsheetDocument.WorkbookPart.AddNewPart<WorksheetPart>();
@@ -70,12 +65,17 @@ namespace OpenXmlFun.Excel.Writer
                 _spreadsheetDocument.WorkbookPart.WorkbookStylesPart.Stylesheet = _excelStylesheetProvider.Stylesheet;
             }
 
-            _sheets[name] = new ExcelSheet(worksheetPart, _excelStylesheetProvider, columnWidths);
+            _sheets[name] = new ExcelSheet(worksheetPart, _excelStylesheetProvider);
             return _sheets[name];
         }
 
         public void Dispose()
         {
+            foreach (var key in _sheets.Keys)
+            {
+                _sheets[key].Save();
+            }
+
             _spreadsheetDocument.Save();
             _spreadsheetDocument.Dispose();
         }
