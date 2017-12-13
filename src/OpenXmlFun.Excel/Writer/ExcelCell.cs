@@ -12,7 +12,6 @@ namespace OpenXmlFun.Excel.Writer
         }
 
         public Object Value { get; set; }
-        public string Formula { get; set; }
         public bool Strike { get; set; }
         public bool Bold { get; set; }
         public ExcelColors FontColor { get; set; }
