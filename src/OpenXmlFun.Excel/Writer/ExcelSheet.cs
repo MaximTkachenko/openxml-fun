@@ -190,14 +190,6 @@ namespace OpenXmlFun.Excel.Writer
                 };
             }
             cell.CellReference = $"{ExcelColumnNames[index]}{_rowIndex}";
-            if (!string.IsNullOrWhiteSpace(sourceCell.Hyperlink))
-            {
-                cell.CellFormula = new CellFormula
-                {
-                    Space = SpaceProcessingModeValues.Preserve,
-                    Text = $@"HYPERLINK(""{sourceCell.Hyperlink}"", ""{sourceCell.Value.ToString()}"")"
-                };
-            }
             return cell;
         }
     }

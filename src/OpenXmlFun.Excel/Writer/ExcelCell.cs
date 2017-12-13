@@ -17,7 +17,6 @@ namespace OpenXmlFun.Excel.Writer
         public bool Bold { get; set; }
         public ExcelColors FontColor { get; set; }
         public ExcelColors BackgroundColor { get; set; }
-        public string Hyperlink { get; set; }
         public bool EmptyOnDefault { get; set; }
     }
 }
