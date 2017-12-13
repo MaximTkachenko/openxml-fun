@@ -40,7 +40,7 @@ namespace OpenXmlFun.Excel.Writer
         {
             if (_sheets.ContainsKey(name))
             {
-                throw new InvalidOperationException("[{name}] sheet already exists.");
+                throw new InvalidOperationException($"[{name}] sheet already exists.");
             }
 
             var worksheetPart = _spreadsheetDocument.WorkbookPart.AddNewPart<WorksheetPart>();
