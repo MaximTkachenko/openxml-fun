@@ -23,17 +23,12 @@ namespace OpenXmlFun.Excel.Writer
             _excelStylesheetProvider = excelStylesheetProvider;
         }
 
-        public ExcelSheet AddHeader(params string[] columnNames)
+        public ExcelSheet AddHeader(IEnumerable<string> columnNames)
         {
-            return AddRow(columnNames?.Select(cn => new ExcelCell(cn)
-            {
-                Bold = true,
-                FontColor = ExcelColors.White,
-                BackgroundColor = ExcelColors.Black
-            }).ToArray());
+            return AddHeader(columnNames?.ToArray());
         }
 
-        public ExcelSheet AddHeader(IEnumerable<string> columnNames)
+        public ExcelSheet AddHeader(params string[] columnNames)
         {
             return AddRow(columnNames?.Select(cn => new ExcelCell(cn)
             {
@@ -53,6 +48,11 @@ namespace OpenXmlFun.Excel.Writer
             return AddRow(values?.Select(v => new ExcelCell(v)).ToArray());
         }
 
+        public ExcelSheet AddRow(IEnumerable<ExcelCell> cells)
+        {
+            return AddRow(cells?.ToArray());
+        }
+
         public ExcelSheet AddRow(params ExcelCell[] cells)
         {
             var row = new Row { RowIndex = (UInt32)_rowIndex };
@@ -61,24 +61,6 @@ namespace OpenXmlFun.Excel.Writer
                 for (int i = 0; i < cells.Length; i++)
                 {
                     row.AppendChild(CreateCell(cells[i], i));
-                }
-            }
-
-            _sheetData.AppendChild(row);
-            _rowIndex++;
-
-            return this;
-        }
-
-        public ExcelSheet AddRow(IEnumerable<ExcelCell> cells)
-        {
-            var cellsArr = cells?.ToArray();
-            var row = new Row { RowIndex = (UInt32)_rowIndex };
-            if (cellsArr != null && cellsArr.Length > 0)
-            {
-                for (int i = 0; i < cellsArr.Length; i++)
-                {
-                    row.AppendChild(CreateCell(cellsArr[i], i));
                 }
             }
 
