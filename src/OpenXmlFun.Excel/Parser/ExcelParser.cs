@@ -20,10 +20,6 @@ namespace OpenXmlFun.Excel.Parser
     public sealed class ExcelParser<T> : IDisposable
         where T : new()
     {
-        private const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        // ReSharper disable once StaticMemberInGenericType
-        private static readonly string[] ExcelColumnNames = new string[Alphabet.Length * 2];
-
         // ReSharper disable once StaticMemberInGenericType
         private static readonly string NotSupportedExceptionMessage;
 
@@ -35,7 +31,7 @@ namespace OpenXmlFun.Excel.Parser
                 {typeof(float), (str => float.Parse(str, CultureInfo.InvariantCulture), 0)},
                 {typeof(double), (str => double.Parse(str, CultureInfo.InvariantCulture), 0)},
                 {typeof(decimal), (str => decimal.Parse(str, CultureInfo.InvariantCulture), 0M)},
-                {typeof(DateTime), (str => DateTime.Parse(str, CultureInfo.InvariantCulture), DateTime.MinValue)},
+                {typeof(DateTime), (str => DateTime.FromOADate(double.Parse(str)), DateTime.MinValue)},
                 {typeof(string), (str => str, string.Empty)}
             };
 
@@ -45,16 +41,6 @@ namespace OpenXmlFun.Excel.Parser
 
         static ExcelParser()
         {
-            for (int i = 0; i < Alphabet.Length; i++)
-            {
-                ExcelColumnNames[i] = Alphabet[i].ToString();
-            }
-
-            for (int i = 0; i < Alphabet.Length; i++)
-            {
-                ExcelColumnNames[i + Alphabet.Length] = $"{Alphabet[0]}{Alphabet[i]}";
-            }
-
             NotSupportedExceptionMessage = $@"Supported types: {string.Join(", ", Parsers.Keys.Select(x => x.Name))}.";
         }
 
@@ -135,7 +121,7 @@ namespace OpenXmlFun.Excel.Parser
 
         private string GetDataFromCell(List<Cell> cells, uint rowNumber, int itemNumber)
         {
-            Cell cell = cells.FirstOrDefault(x => x.CellReference.Value.Equals(ExcelColumnNames[itemNumber] + rowNumber.ToString()));
+            Cell cell = cells.FirstOrDefault(x => x.CellReference.Value.Equals(ColumnAliases.ExcelColumnNames[itemNumber] + rowNumber.ToString()));
             if (cell == null)
             {
                 return null;

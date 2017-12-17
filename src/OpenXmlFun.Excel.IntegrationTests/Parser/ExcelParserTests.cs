@@ -47,7 +47,7 @@ namespace OpenXmlFun.Excel.IntegrationTests.Parser
             items[0].Number.Should().Be(1);
             items[0].Description.Should().Be("description one");
             items[0].Created.Should().Be(new DateTime(2018, 2, 3));
-            items[0].Sum.Should().Be(33000.66M);
+            Math.Round(items[0].Sum, 2).Should().Be(33000.66M);
         }
     }
 }

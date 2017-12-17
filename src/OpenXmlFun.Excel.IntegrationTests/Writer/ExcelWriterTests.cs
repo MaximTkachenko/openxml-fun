@@ -27,18 +27,18 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
                     .AddRow(DateTime.Now, DateTime.MinValue, 555.77M, 55, null, nullDt, 0M)
                     .AddRow(nullArray)
                     .AddRow(null)
-                    .AddRow(new ExcelCell { Value = @"some /\ text" },
-                        new ExcelCell{ Value = DateTime.Now, Bold = true, Strike = true, FontColor = ExcelColors.Red, BackgroundColor = ExcelColors.Green },
-                        new ExcelCell{ Value = 555.77M, BackgroundColor = ExcelColors.Blue },
-                        new ExcelCell{ Value = 55 });
+                    .AddRow(new ExcelCell(@"some /\ text" ),
+                        new ExcelCell(DateTime.Now) { Bold = true, Strike = true, FontColor = ExcelColors.Red, BackgroundColor = ExcelColors.Green },
+                        new ExcelCell(555.77M) { BackgroundColor = ExcelColors.Blue },
+                        new ExcelCell(55));
 
                 writer.AddSheet("Договоры_2")
                     .ApplyColumnWidths(20, 20, 20, 20)
                     .AddHeader("text_2", "datetime_2", "money_2", "count_2")
-                    .AddRow(new ExcelCell { Value = "hi im here", Bold = true },
-                        new ExcelCell{ Value = DateTime.UtcNow, FontColor = ExcelColors.Red },
-                        new ExcelCell{ Value = 222.88M, FontColor = ExcelColors.Green },
-                        new ExcelCell{ Value = 1277 });
+                    .AddRow(new ExcelCell("hi im here") { Bold = true },
+                        new ExcelCell(DateTime.UtcNow) { FontColor = ExcelColors.Red },
+                        new ExcelCell(222.88M) { FontColor = ExcelColors.Green },
+                        new ExcelCell(1277));
             }
         }        
     }

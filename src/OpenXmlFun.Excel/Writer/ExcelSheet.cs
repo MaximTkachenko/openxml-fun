@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
@@ -14,24 +15,8 @@ namespace OpenXmlFun.Excel.Writer
         private readonly ExcelStylesheetProvider _excelStylesheetProvider;
         private int _rowIndex = 1;
 
-        private const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        // ReSharper disable once StaticMemberInGenericType
-        private static readonly string[] ExcelColumnNames = new string[Alphabet.Length * 2];
-        
-        static ExcelSheet()
-        {
-            for (int i = 0; i < Alphabet.Length; i++)
-            {
-                ExcelColumnNames[i] = Alphabet[i].ToString();
-            }
-
-            for (int i = 0; i < Alphabet.Length; i++)
-            {
-                ExcelColumnNames[i + Alphabet.Length] = $"{Alphabet[0]}{Alphabet[i]}";
-            }
-        }
-
-        internal ExcelSheet(WorksheetPart sheetPart, ExcelStylesheetProvider excelStylesheetProvider)
+        internal ExcelSheet(WorksheetPart sheetPart,
+            ExcelStylesheetProvider excelStylesheetProvider)
         {
             _sheet = sheetPart.Worksheet;
             _sheetData = sheetPart.Worksheet.GetFirstChild<SheetData>();
@@ -40,9 +25,18 @@ namespace OpenXmlFun.Excel.Writer
 
         public ExcelSheet AddHeader(params string[] columnNames)
         {
-            return AddRow(columnNames?.Select(cn => new ExcelCell
+            return AddRow(columnNames?.Select(cn => new ExcelCell(cn)
             {
-                Value = cn,
+                Bold = true,
+                FontColor = ExcelColors.White,
+                BackgroundColor = ExcelColors.Black
+            }).ToArray());
+        }
+
+        public ExcelSheet AddHeader(IEnumerable<string> columnNames)
+        {
+            return AddRow(columnNames?.Select(cn => new ExcelCell(cn)
+            {
                 Bold = true,
                 FontColor = ExcelColors.White,
                 BackgroundColor = ExcelColors.Black
@@ -51,10 +45,12 @@ namespace OpenXmlFun.Excel.Writer
 
         public ExcelSheet AddRow(params object[] values)
         {
-            return AddRow(values?.Select(v => new ExcelCell
-            {
-                Value = v
-            }).ToArray());
+            return AddRow(values?.Select(v => new ExcelCell(v)).ToArray());
+        }
+
+        public ExcelSheet AddRow(IEnumerable<object> values)
+        {
+            return AddRow(values?.Select(v => new ExcelCell(v)).ToArray());
         }
 
         public ExcelSheet AddRow(params ExcelCell[] cells)
@@ -65,6 +61,24 @@ namespace OpenXmlFun.Excel.Writer
                 for (int i = 0; i < cells.Length; i++)
                 {
                     row.AppendChild(CreateCell(cells[i], i));
+                }
+            }
+
+            _sheetData.AppendChild(row);
+            _rowIndex++;
+
+            return this;
+        }
+
+        public ExcelSheet AddRow(IEnumerable<ExcelCell> cells)
+        {
+            var cellsArr = cells?.ToArray();
+            var row = new Row { RowIndex = (UInt32)_rowIndex };
+            if (cellsArr != null && cellsArr.Length > 0)
+            {
+                for (int i = 0; i < cellsArr.Length; i++)
+                {
+                    row.AppendChild(CreateCell(cellsArr[i], i));
                 }
             }
 
@@ -169,11 +183,11 @@ namespace OpenXmlFun.Excel.Writer
         {
             Cell cell;
             if (sourceCell.Value != null &&
-                SupportedTypesDetails.Data.TryGetValue(sourceCell.Value.GetType(), 
+                SupportedTypesDetails.Data.TryGetValue(sourceCell.Value.GetType(),
                     out (uint NumberFormatId, Func<object, Cell> Factory, Func<object, bool> IsDefault) typeDetails))
             {
                 cell = typeDetails.Factory.Invoke(sourceCell.Value);
-                if (typeDetails.IsDefault.Invoke(sourceCell.Value) && sourceCell.EmptyOnDefault)
+                if (typeDetails.IsDefault(sourceCell.Value) && sourceCell.EmptyOnDefault)
                 {
                     cell.CellValue = new CellValue(string.Empty);
                 }
@@ -181,15 +195,16 @@ namespace OpenXmlFun.Excel.Writer
             }
             else
             {
-                sourceCell.Value = string.Empty;
                 cell = new Cell
                 {
                     DataType = CellValues.String,
-                    CellValue = new CellValue(string.Empty),
-                    StyleIndex = _excelStylesheetProvider.GetStyleId(sourceCell)
+                    CellValue = new CellValue(string.Empty)
                 };
             }
-            cell.CellReference = $"{ExcelColumnNames[index]}{_rowIndex}";
+            cell.CellReference = $"{ColumnAliases.ExcelColumnNames[index]}{_rowIndex}";
+
+            sourceCell.Apply(cell);
+
             return cell;
         }
     }

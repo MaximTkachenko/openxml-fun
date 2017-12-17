@@ -28,7 +28,7 @@ namespace OpenXmlFun.Excel.Writer
                     }, 
                     value => (DateTime)value == DateTime.MinValue) },
             { typeof(decimal),
-                (2, 
+                (4, 
                     value => new Cell
                     {
                         DataType = CellValues.Number,
