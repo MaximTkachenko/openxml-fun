@@ -13,7 +13,7 @@ namespace OpenXmlFun.Excel.Writer
         private readonly Worksheet _sheet;
         private readonly SheetData _sheetData;
         private readonly ExcelStylesheetProvider _excelStylesheetProvider;
-        private int _rowIndex = 1;
+        private uint _rowIndex = 1;
 
         internal ExcelSheet(WorksheetPart sheetPart,
             ExcelStylesheetProvider excelStylesheetProvider)
@@ -55,7 +55,7 @@ namespace OpenXmlFun.Excel.Writer
 
         public ExcelSheet AddRow(params ExcelCell[] cells)
         {
-            var row = new Row { RowIndex = (UInt32)_rowIndex };
+            var row = new Row { RowIndex = _rowIndex };
             if (cells != null && cells.Length > 0)
             {
                 for (int i = 0; i < cells.Length; i++)
@@ -114,7 +114,7 @@ namespace OpenXmlFun.Excel.Writer
         {
             if (firstNRows <= 0)
             {
-                return this;
+                throw new ArgumentException($"{nameof(firstNRows)} must be greater that zero.");
             }
 
             var sheetViews = _sheet.GetFirstChild<SheetViews>();
