@@ -114,7 +114,7 @@ namespace OpenXmlFun.Excel.Writer
         {
             if (firstNRows <= 0)
             {
-                throw new ArgumentException($"{nameof(firstNRows)} must be greater that zero.");
+                throw new ArgumentException($"{nameof(firstNRows)} must be greater than zero.");
             }
 
             var sheetViews = _sheet.GetFirstChild<SheetViews>();
