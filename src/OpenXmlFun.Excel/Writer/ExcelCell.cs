@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+﻿using System;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace OpenXmlFun.Excel.Writer
 {
@@ -19,44 +20,94 @@ namespace OpenXmlFun.Excel.Writer
         public ExcelColors BackgroundColor { get; set; }
         public bool EmptyOnDefault { get; set; }
 
-        internal virtual void Apply(Cell cell) { }
+        internal virtual void Apply(Cell cell, string columnAlias, uint rowIndex) { }
+
+        protected void CheckIndex(int index)
+        {
+            if (index <= 0)
+            {
+                throw new IndexOutOfRangeException("Row or column index must be more than zero.");
+            }
+        }
     }
 
-    public class SumExcelCell : ExcelCell
+    public class DecimalVerticalSumExcelCell : ExcelCell
     {
-        public SumExcelCell(int fromRowNumber, int toRowNumber) : base(0M)
+        public DecimalVerticalSumExcelCell(int fromRowNumber, int toRowNumber) : base(0M)
         {
+            CheckIndex(fromRowNumber);
             FromRowNumber = fromRowNumber;
+
+            CheckIndex(toRowNumber);
             ToRowNumber = toRowNumber;
         }
 
         public int FromRowNumber { get; }
         public int ToRowNumber { get; }
 
-        internal override void Apply(Cell cell)
+        internal override void Apply(Cell cell, string columnAlias, uint rowIndex)
         {
-            string columnAlias = GetColumnAlias(cell.CellReference);
             cell.CellFormula = new CellFormula($"SUBTOTAL(9,{columnAlias}{FromRowNumber}:{columnAlias}{ToRowNumber})")
             {
                 CalculateCell = true
             };
         }
+    }
 
-        private string GetColumnAlias(string cellReference)
+    public class DecimalHorizontalSumExcelCell : ExcelCell
+    {
+        public DecimalHorizontalSumExcelCell(int fromColumnNumber, int toColumnNumber) : base(0M)
         {
-            string result = null;
-            foreach (var cri in cellReference)
+            CheckIndex(fromColumnNumber);
+            FromColumnNumber = fromColumnNumber;
+
+            CheckIndex(toColumnNumber);
+            ToColumnNumber = toColumnNumber;
+        }
+
+        public int FromColumnNumber { get; }
+        public int ToColumnNumber { get; }
+
+        internal override void Apply(Cell cell, string columnAlias, uint rowIndex)
+        {
+            cell.CellFormula = new CellFormula($"SUBTOTAL(9,{ColumnAliases.ExcelColumnNames[FromColumnNumber - 1]}{rowIndex}:{ColumnAliases.ExcelColumnNames[ToColumnNumber - 1]}{rowIndex})")
             {
-                if (!int.TryParse(cri.ToString(), out var _))
-                {
-                    result += cri;
-                    continue;
-                }
+                CalculateCell = true
+            };
+        }
+    }
 
-                break;
-            }
+    public class DecimalSumExcelCell : ExcelCell
+    {
+        public DecimalSumExcelCell(int fromColumnNumber, int toColumnNumber, int fromRowNumber, int toRowNumber) : base(0M)
+        {
+            CheckIndex(fromColumnNumber);
+            FromColumnNumber = fromColumnNumber;
 
-            return result;
+            CheckIndex(toColumnNumber);
+            ToColumnNumber = toColumnNumber;
+
+            CheckIndex(fromRowNumber);
+            FromRowNumber = fromRowNumber;
+
+            CheckIndex(toRowNumber);
+            ToRowNumber = toRowNumber;
+        }
+
+        public int FromColumnNumber { get; }
+        public int ToColumnNumber { get; }
+        public int FromRowNumber { get; }
+        public int ToRowNumber { get; }
+
+        internal override void Apply(Cell cell, string columnAlias, uint rowIndex)
+        {
+            cell.CellFormula = new CellFormula($"SUBTOTAL(9,{ColumnAliases.ExcelColumnNames[FromColumnNumber - 1]}{FromRowNumber}" +
+                                               $":{ColumnAliases.ExcelColumnNames[ToColumnNumber - 1]}{FromRowNumber}" +
+                                               $":{ColumnAliases.ExcelColumnNames[FromColumnNumber - 1]}{FromRowNumber}" +
+                                               $":{ColumnAliases.ExcelColumnNames[FromColumnNumber - 1]}{ToRowNumber})")
+            {
+                CalculateCell = true
+            };
         }
     }
 }

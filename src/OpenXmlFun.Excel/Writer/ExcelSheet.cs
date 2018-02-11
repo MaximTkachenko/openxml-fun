@@ -185,7 +185,7 @@ namespace OpenXmlFun.Excel.Writer
             }
             cell.CellReference = $"{ColumnAliases.ExcelColumnNames[index]}{_rowIndex}";
 
-            sourceCell.Apply(cell);
+            sourceCell.Apply(cell, ColumnAliases.ExcelColumnNames[index], _rowIndex);
 
             return cell;
         }
