@@ -21,6 +21,9 @@ namespace OpenXmlFun.Excel.Writer
             _sheet = sheetPart.Worksheet;
             _sheetData = sheetPart.Worksheet.GetFirstChild<SheetData>();
             _excelStylesheetProvider = excelStylesheetProvider;
+
+            //set default columns' widths
+            ApplyColumnWidths(20);
         }
 
         public ExcelSheet AddHeader(IEnumerable<string> columnNames)
@@ -72,6 +75,11 @@ namespace OpenXmlFun.Excel.Writer
 
         public ExcelSheet ApplyColumnWidths(params double[] columnWidths)
         {
+            if (columnWidths == null || columnWidths.Length == 0)
+            {
+                throw new ArgumentException($"{nameof(columnWidths)} should not be empty.");
+            }
+
             var columns = _sheet.GetFirstChild<Columns>();
             if (columns != null)
             {
@@ -83,28 +91,25 @@ namespace OpenXmlFun.Excel.Writer
                 _sheet.InsertAt(columns, 0);
             }
 
-            if (columnWidths != null && columnWidths.Length > 0)
+            for (uint columnIndex = 0; columnIndex < columnWidths.Length; columnIndex++)
             {
-                for (uint columnIndex = 0; columnIndex < columnWidths.Length; columnIndex++)
+                columns.Append(new Column
                 {
-                    columns.Append(new Column
-                    {
-                        Min = new UInt32Value(columnIndex + 1),
-                        Max = new UInt32Value(columnIndex + 1),
-                        Width = new DoubleValue(columnWidths[columnIndex]),
-                        CustomWidth = true
-                    });
-                }
-                for (uint columnIndex = (uint)columnWidths.Length; columnIndex < columnWidths.Length + 25; columnIndex++)
+                    Min = new UInt32Value(columnIndex + 1),
+                    Max = new UInt32Value(columnIndex + 1),
+                    Width = new DoubleValue(columnWidths[columnIndex]),
+                    CustomWidth = true
+                });
+            }
+            for (uint columnIndex = (uint)columnWidths.Length; columnIndex < columnWidths.Length + 25; columnIndex++)
+            {
+                columns.Append(new Column
                 {
-                    columns.Append(new Column
-                    {
-                        Min = new UInt32Value(columnIndex + 1),
-                        Max = new UInt32Value(columnIndex + 1),
-                        Width = new DoubleValue(15d),
-                        CustomWidth = true
-                    });
-                }
+                    Min = new UInt32Value(columnIndex + 1),
+                    Max = new UInt32Value(columnIndex + 1),
+                    Width = new DoubleValue(15d),
+                    CustomWidth = true
+                });
             }
 
             return this;
@@ -126,11 +131,6 @@ namespace OpenXmlFun.Excel.Writer
             {
                 sheetViews = new SheetViews();
                 var columns = _sheet.GetFirstChild<Columns>();
-                if (columns == null)
-                {
-                    ApplyColumnWidths();
-                    columns = _sheet.GetFirstChild<Columns>();
-                }
                 _sheet.InsertBefore(sheetViews, columns);
             }
 
