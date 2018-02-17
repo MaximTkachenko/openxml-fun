@@ -3,5 +3,5 @@ Create excel tables using `ExcelWriter` and parse excel tables to list of entiti
 
 It supports following .net types: `String`, `Int32`, `Decimal`, `DateTime`.
 
-Target frameworks: `netstandard2.0`, `net45`.
+Target framework: `netstandard2.0`.
 

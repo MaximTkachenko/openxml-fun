@@ -6,9 +6,6 @@ using System.Linq;
 using System.Reflection;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-#if NETFULL
-using System.ValueType;
-#endif
 
 namespace OpenXmlFun.Excel.Parser
 {
