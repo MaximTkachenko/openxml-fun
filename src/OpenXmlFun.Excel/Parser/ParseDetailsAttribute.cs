@@ -7,11 +7,9 @@ namespace OpenXmlFun.Excel.Parser
     {
         public ParseDetailsAttribute(int order)
         {
-            if (order < 0)
-            {
-                throw new ArgumentException($"{nameof(order)} can't be less than zero.");
-            }
-            Order = order;
+            Order = order < 0
+                ? throw new ArgumentException($"{nameof(order)} can't be less than zero.")
+                : order;
         }
 
         public int Order { get; }

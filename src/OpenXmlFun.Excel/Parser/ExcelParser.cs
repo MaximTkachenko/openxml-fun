@@ -109,6 +109,7 @@ namespace OpenXmlFun.Excel.Parser
                     {
                         parsedValue = Parsers[propertyType].defaultValue;
                     }
+                    //todo can i use IL dynamic method here
                     property.SetValue(item, parsedValue, null);
                 }
                 list.Add(item);
