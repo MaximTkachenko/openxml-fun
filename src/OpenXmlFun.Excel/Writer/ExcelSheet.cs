@@ -4,6 +4,8 @@ using System.Linq;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using OpenXmlFun.Excel.Writer.Cells;
+
 // ReSharper disable PossiblyMistakenUseOfParamsMethod
 
 namespace OpenXmlFun.Excel.Writer
@@ -12,15 +14,12 @@ namespace OpenXmlFun.Excel.Writer
     {
         private readonly Worksheet _sheet;
         private readonly SheetData _sheetData;
-        private readonly ExcelStylesheetProvider _excelStylesheetProvider;
         private uint _rowIndex = 1;
 
-        internal ExcelSheet(WorksheetPart sheetPart,
-            ExcelStylesheetProvider excelStylesheetProvider)
+        internal ExcelSheet(WorksheetPart sheetPart)
         {
             _sheet = sheetPart.Worksheet;
             _sheetData = sheetPart.Worksheet.GetFirstChild<SheetData>();
-            _excelStylesheetProvider = excelStylesheetProvider;
 
             //set default columns' widths
             ApplyColumnWidths(20);
@@ -33,37 +32,28 @@ namespace OpenXmlFun.Excel.Writer
 
         public ExcelSheet AddHeader(params string[] columnNames)
         {
-            return AddRow(columnNames?.Select(cn => new ExcelCell(cn)
+            return AddRow(columnNames?.Select(cn => new StringCell(cn)
             {
                 Bold = true,
                 FontColor = ExcelColors.White,
                 BackgroundColor = ExcelColors.Black
-            }).ToArray());
+            }));
         }
 
-        public ExcelSheet AddRow(params object[] values)
-        {
-            return AddRow(values?.Select(v => new ExcelCell(v)).ToArray());
-        }
-
-        public ExcelSheet AddRow(IEnumerable<object> values)
-        {
-            return AddRow(values?.Select(v => new ExcelCell(v)).ToArray());
-        }
-
-        public ExcelSheet AddRow(IEnumerable<ExcelCell> cells)
+        public ExcelSheet AddRow(IEnumerable<CellBase> cells)
         {
             return AddRow(cells?.ToArray());
         }
 
-        public ExcelSheet AddRow(params ExcelCell[] cells)
+        public ExcelSheet AddRow(params CellBase[] cells)
         {
             var row = new Row { RowIndex = _rowIndex };
             if (cells != null && cells.Length > 0)
             {
                 for (int i = 0; i < cells.Length; i++)
                 {
-                    row.AppendChild(CreateCell(cells[i], i));
+                    var cell = cells[i].Create(i, _rowIndex);
+                    row.AppendChild(cell);
                 }
             }
 
@@ -159,35 +149,6 @@ namespace OpenXmlFun.Excel.Writer
         {
             _sheet.Save();
             return this;
-        }
-
-        private Cell CreateCell(ExcelCell sourceCell, int index)
-        {
-            Cell cell;
-            if (sourceCell.Value != null &&
-                SupportedTypesDetails.Data.TryGetValue(sourceCell.Value.GetType(),
-                    out (uint NumberFormatId, Func<object, Cell> Factory, Func<object, bool> IsDefault) typeDetails))
-            {
-                cell = typeDetails.Factory.Invoke(sourceCell.Value);
-                if (typeDetails.IsDefault(sourceCell.Value) && sourceCell.EmptyOnDefault)
-                {
-                    cell.CellValue = new CellValue(string.Empty);
-                }
-                cell.StyleIndex = _excelStylesheetProvider.GetStyleId(sourceCell);
-            }
-            else
-            {
-                cell = new Cell
-                {
-                    DataType = CellValues.String,
-                    CellValue = new CellValue(string.Empty)
-                };
-            }
-            cell.CellReference = $"{ColumnAliases.ExcelColumnNames[index]}{_rowIndex}";
-
-            sourceCell.Apply(cell, ColumnAliases.ExcelColumnNames[index], _rowIndex);
-
-            return cell;
         }
     }
 }

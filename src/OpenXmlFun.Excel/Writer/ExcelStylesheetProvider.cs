@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
+using OpenXmlFun.Excel.Writer.Cells;
+
 // ReSharper disable PossiblyMistakenUseOfParamsMethod
 
 namespace OpenXmlFun.Excel.Writer
 {
-    internal class ExcelStylesheetProvider
+    internal static class ExcelStylesheetProvider
     {
         private static readonly Dictionary<ExcelColors, string> Colors = new Dictionary<ExcelColors, string>
         {
@@ -18,9 +20,9 @@ namespace OpenXmlFun.Excel.Writer
             { ExcelColors.Grey, "AAAAAA" }
         };
 
-        private readonly Dictionary<string, uint> _styles = new Dictionary<string, uint>();
+        private static readonly Dictionary<string, uint> Styles = new Dictionary<string, uint>();
 
-        public ExcelStylesheetProvider(bool wrapText)
+        static ExcelStylesheetProvider()
         {
             var fonts = new Fonts();
             //default Font
@@ -132,17 +134,17 @@ namespace OpenXmlFun.Excel.Writer
                         continue;
                     }
 
-                    foreach (var typeDetails in SupportedTypesDetails.Data)
+                    foreach (var typeDetails in NumberFormats.Data)
                     {
                         cellFormats.AppendChild(new CellFormat
                         {
                             ApplyNumberFormat = true,
-                            NumberFormatId = typeDetails.Value.NumberFormatId,
+                            NumberFormatId = typeDetails.Value,
                             ApplyAlignment = true,
                             Alignment = new Alignment
                             {
                                 Vertical = VerticalAlignmentValues.Top,
-                                WrapText = wrapText
+                                WrapText = true
                             },
                             ApplyBorder = true,
                             BorderId = 1,
@@ -154,7 +156,7 @@ namespace OpenXmlFun.Excel.Writer
                         });
 
                         csIndex++;
-                        _styles[GetKey(typeDetails.Key, 
+                        Styles[GetKey(typeDetails.Key, 
                             font.Color.Rgb, 
                             fill.PatternFill.ForegroundColor.Rgb.Value, 
                             font.Bold != null, 
@@ -171,18 +173,18 @@ namespace OpenXmlFun.Excel.Writer
             Stylesheet = new Stylesheet(fonts, fills, borders, cellFormats);
         }
 
-        public Stylesheet Stylesheet { get; }
+        public static readonly Stylesheet Stylesheet;
 
-        public uint GetStyleId(ExcelCell cell)
+        public static uint GetStyleId<T>(Cell<T> cell)
         {
-            return _styles[GetKey(cell.Value.GetType(), 
+            return Styles[GetKey(typeof(T), 
                 Colors[cell.FontColor], 
                 Colors[cell.BackgroundColor], 
                 cell.Bold, 
                 cell.Strike)];
         }
 
-        private string GetKey(Type type, string fontColorHex, string backgroundColorHex, bool isBold, bool isStroked)
+        private static string GetKey(Type type, string fontColorHex, string backgroundColorHex, bool isBold, bool isStroked)
         {
             return $"{type.Name}:{fontColorHex}:{backgroundColorHex}:{isBold}:{isStroked}";
         }

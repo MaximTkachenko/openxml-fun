@@ -17,9 +17,8 @@ namespace OpenXmlFun.Excel.Writer
     {
         private readonly SpreadsheetDocument _spreadsheetDocument;
         private readonly Dictionary<string, ExcelSheet> _sheets;
-        private readonly ExcelStylesheetProvider _excelStylesheetProvider;
 
-        public ExcelWriter(string filePath, bool wrapText = true)
+        public ExcelWriter(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
@@ -30,7 +29,6 @@ namespace OpenXmlFun.Excel.Writer
             _spreadsheetDocument.WorkbookPart.Workbook = new Workbook();
 
             _sheets = new Dictionary<string, ExcelSheet>();
-            _excelStylesheetProvider = new ExcelStylesheetProvider(wrapText);
         }
 
         public ExcelSheet AddSheet(string name)
@@ -59,10 +57,10 @@ namespace OpenXmlFun.Excel.Writer
             if (_spreadsheetDocument.WorkbookPart.WorkbookStylesPart == null)
             {
                 _spreadsheetDocument.WorkbookPart.AddNewPart<WorkbookStylesPart>();
-                _spreadsheetDocument.WorkbookPart.WorkbookStylesPart.Stylesheet = _excelStylesheetProvider.Stylesheet;
+                _spreadsheetDocument.WorkbookPart.WorkbookStylesPart.Stylesheet = ExcelStylesheetProvider.Stylesheet;
             }
 
-            _sheets[name] = new ExcelSheet(worksheetPart, _excelStylesheetProvider);
+            _sheets[name] = new ExcelSheet(worksheetPart);
             return _sheets[name];
         }
 
