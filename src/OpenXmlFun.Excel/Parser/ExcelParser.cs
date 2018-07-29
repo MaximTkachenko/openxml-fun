@@ -130,7 +130,7 @@ namespace OpenXmlFun.Excel.Parser
                     ? cell.InnerText
                     : (cell.CellValue == null
                         ? null
-                        : _ssTable?.ChildElements[int.Parse(cell.CellValue.InnerText)].InnerText))
+                        : _ssTable?.ChildElements[int.Parse(cell.CellValue.InnerText)].InnerText ?? cell.CellValue.InnerText))
                 : cell.CellValue.InnerText;
         }
 
