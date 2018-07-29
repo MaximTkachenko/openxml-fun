@@ -28,7 +28,7 @@ namespace OpenXmlFun.Excel.Parser
                 {typeof(float), (str => float.Parse(str, CultureInfo.InvariantCulture), 0)},
                 {typeof(double), (str => double.Parse(str, CultureInfo.InvariantCulture), 0)},
                 {typeof(decimal), (str => decimal.Parse(str, CultureInfo.InvariantCulture), 0M)},
-                {typeof(DateTime), (str => DateTime.FromOADate(double.Parse(str)), DateTime.MinValue)},
+                {typeof(DateTime), (str => DateTime.FromOADate(double.Parse(str, CultureInfo.InvariantCulture)), DateTime.MinValue)},
                 {typeof(string), (str => str, string.Empty)}
             };
 
@@ -56,7 +56,7 @@ namespace OpenXmlFun.Excel.Parser
             }
 
             _worksheet = ((WorksheetPart)_spreadsheetDocument.WorkbookPart.GetPartById(sheet.Id.Value)).Worksheet;
-            _ssTable = _spreadsheetDocument.WorkbookPart.GetPartsOfType<SharedStringTablePart>().First().SharedStringTable;
+            _ssTable = _spreadsheetDocument.WorkbookPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault()?.SharedStringTable;
         }
 
         public List<T> Parse(bool ignoreFirstRow = false)
@@ -130,7 +130,7 @@ namespace OpenXmlFun.Excel.Parser
                     ? cell.InnerText
                     : (cell.CellValue == null
                         ? null
-                        : _ssTable.ChildElements[int.Parse(cell.CellValue.InnerText)].InnerText))
+                        : _ssTable?.ChildElements[int.Parse(cell.CellValue.InnerText)].InnerText))
                 : cell.CellValue.InnerText;
         }
 
