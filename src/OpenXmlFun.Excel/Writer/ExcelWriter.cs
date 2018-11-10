@@ -27,6 +27,7 @@ namespace OpenXmlFun.Excel.Writer
             _spreadsheetDocument = SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook);
             _spreadsheetDocument.AddWorkbookPart();
             _spreadsheetDocument.WorkbookPart.Workbook = new Workbook();
+            _spreadsheetDocument.WorkbookPart.Workbook.Append(new BookViews(new WorkbookView()));
 
             _sheets = new Dictionary<string, ExcelSheet>();
         }
