@@ -35,7 +35,7 @@ namespace OpenXmlFun.Excel.IntegrationTests.Parser
             var cultureInfo = new CultureInfo(culture);
             CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
             CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
-            string filePath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"Parser\ItemsToParse.xlsx");
+            string filePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Parser", "ItemsToParse.xlsx");
 
             List<ItemToParse> items;
             using (var parser = new ExcelParser<ItemToParse>(filePath))
