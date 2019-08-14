@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenXmlFun.Excel", "OpenXml
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenXmlFun.Excel.IntegrationTests", "OpenXmlFun.Excel.IntegrationTests\OpenXmlFun.Excel.IntegrationTests.csproj", "{972DC2E7-2374-4B2A-9813-F0A8217576F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenXmlFun.Word", "OpenXmlFun.Word\OpenXmlFun.Word.csproj", "{FC50BA19-87D4-452D-8BE9-622B5C3E405C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenXmlFun.Word.IntegrationTests", "OpenXmlFun.Word.IntegrationTests\OpenXmlFun.Word.IntegrationTests.csproj", "{319E3D97-4FE8-4CB8-A54B-AB3758904EC5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{972DC2E7-2374-4B2A-9813-F0A8217576F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{972DC2E7-2374-4B2A-9813-F0A8217576F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{972DC2E7-2374-4B2A-9813-F0A8217576F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC50BA19-87D4-452D-8BE9-622B5C3E405C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC50BA19-87D4-452D-8BE9-622B5C3E405C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC50BA19-87D4-452D-8BE9-622B5C3E405C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC50BA19-87D4-452D-8BE9-622B5C3E405C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{319E3D97-4FE8-4CB8-A54B-AB3758904EC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{319E3D97-4FE8-4CB8-A54B-AB3758904EC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{319E3D97-4FE8-4CB8-A54B-AB3758904EC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{319E3D97-4FE8-4CB8-A54B-AB3758904EC5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
