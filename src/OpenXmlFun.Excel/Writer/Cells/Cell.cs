@@ -3,6 +3,20 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace OpenXmlFun.Excel.Writer.Cells
 {
+    public enum HorizontalAlignment
+    {
+        Left,
+        Center,
+        Right
+    }
+
+    public enum VerticalAlignment
+    {
+        Top,
+        Center,
+        Bottom
+    }
+
     public abstract class Cell<T> : CellBase
     {
         protected Cell(T value)
@@ -10,21 +24,19 @@ namespace OpenXmlFun.Excel.Writer.Cells
             Value = value;
             FontColor = ExcelColors.Black;
             BackgroundColor = ExcelColors.White;
+            HorizontalAlignment = value is decimal || value is DateTime ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+            VerticalAlignment = VerticalAlignment.Top;
             EmptyOnDefault = true;
         }
 
         public T Value { get; }
-        public bool Strike { get; set; }
-        public bool Bold { get; set; }
-        public ExcelColors FontColor { get; set; }
-        public ExcelColors BackgroundColor { get; set; }
-        public bool EmptyOnDefault { get; set; }
+
+        internal override Type TypeOfValue => typeof(T);
 
         internal override Cell Create(int columnIndex, uint rowIndex)
         {
             var cell =  new Cell
             {
-                StyleIndex = ExcelStylesheetProvider.GetStyleId(this),
                 CellReference = $"{ColumnAliases.ExcelColumnNames[columnIndex]}{rowIndex}"
             };
 

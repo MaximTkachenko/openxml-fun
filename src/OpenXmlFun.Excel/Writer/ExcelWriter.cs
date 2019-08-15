@@ -55,13 +55,14 @@ namespace OpenXmlFun.Excel.Writer
                 Name = name
             });
 
+            var styles = new ExcelStylesheetProvider();
             if (_spreadsheetDocument.WorkbookPart.WorkbookStylesPart == null)
             {
                 _spreadsheetDocument.WorkbookPart.AddNewPart<WorkbookStylesPart>();
-                _spreadsheetDocument.WorkbookPart.WorkbookStylesPart.Stylesheet = ExcelStylesheetProvider.Stylesheet;
+                _spreadsheetDocument.WorkbookPart.WorkbookStylesPart.Stylesheet = styles.Stylesheet;
             }
 
-            _sheets[name] = new ExcelSheet(worksheetPart);
+            _sheets[name] = new ExcelSheet(worksheetPart, styles);
             return _sheets[name];
         }
 

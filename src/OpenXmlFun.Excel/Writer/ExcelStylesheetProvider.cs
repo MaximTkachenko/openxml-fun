@@ -8,7 +8,7 @@ using OpenXmlFun.Excel.Writer.Cells;
 
 namespace OpenXmlFun.Excel.Writer
 {
-    internal static class ExcelStylesheetProvider
+    internal class ExcelStylesheetProvider
     {
         private static readonly Dictionary<ExcelColors, string> Colors = new Dictionary<ExcelColors, string>
         {
@@ -20,9 +20,9 @@ namespace OpenXmlFun.Excel.Writer
             { ExcelColors.Grey, "AAAAAA" }
         };
 
-        private static readonly Dictionary<string, uint> Styles = new Dictionary<string, uint>();
+        private readonly Dictionary<string, uint> _styles = new Dictionary<string, uint>();
 
-        static ExcelStylesheetProvider()
+        public ExcelStylesheetProvider()
         {
             var fonts = new Fonts();
             //default Font
@@ -135,6 +135,8 @@ namespace OpenXmlFun.Excel.Writer
                     }
 
                     foreach (var typeDetails in NumberFormats.Data)
+                    foreach (HorizontalAlignment hor in Enum.GetValues(typeof(HorizontalAlignment)))
+                    foreach (VerticalAlignment ver in Enum.GetValues(typeof(VerticalAlignment)))
                     {
                         cellFormats.AppendChild(new CellFormat
                         {
@@ -143,8 +145,9 @@ namespace OpenXmlFun.Excel.Writer
                             ApplyAlignment = true,
                             Alignment = new Alignment
                             {
-                                Vertical = VerticalAlignmentValues.Top,
-                                WrapText = true
+                                Vertical = ToVerticalAlignmentValues(ver),
+                                WrapText = true,
+                                Horizontal = ToHorizontalAlignmentValues(hor)
                             },
                             ApplyBorder = true,
                             BorderId = 1,
@@ -156,11 +159,12 @@ namespace OpenXmlFun.Excel.Writer
                         });
 
                         csIndex++;
-                        Styles[GetKey(typeDetails.Key, 
-                            font.Color.Rgb, 
-                            fill.PatternFill.ForegroundColor.Rgb.Value, 
-                            font.Bold != null, 
-                            font.Strike != null)] = csIndex;
+                        _styles[GetKey(typeDetails.Key,
+                            font.Color.Rgb,
+                            fill.PatternFill.ForegroundColor.Rgb.Value,
+                            font.Bold != null,
+                            font.Strike != null,
+                            hor, ver)] = csIndex;
                     }
 
                     fillIndex++;
@@ -173,20 +177,53 @@ namespace OpenXmlFun.Excel.Writer
             Stylesheet = new Stylesheet(fonts, fills, borders, cellFormats);
         }
 
-        public static readonly Stylesheet Stylesheet;
+        public readonly Stylesheet Stylesheet;
 
-        public static uint GetStyleId<T>(Cell<T> cell)
+        public uint GetStyleId(CellBase cell)
         {
-            return Styles[GetKey(typeof(T), 
-                Colors[cell.FontColor], 
-                Colors[cell.BackgroundColor], 
-                cell.Bold, 
-                cell.Strike)];
+            return _styles[GetKey(cell.TypeOfValue,
+                Colors[cell.FontColor],
+                Colors[cell.BackgroundColor],
+                cell.Bold,
+                cell.Strike,
+                cell.HorizontalAlignment,
+                cell.VerticalAlignment)];
         }
 
-        private static string GetKey(Type type, string fontColorHex, string backgroundColorHex, bool isBold, bool isStroked)
+        private string GetKey(Type type, string fontColorHex, string backgroundColorHex,
+            bool isBold, bool isStroked, HorizontalAlignment hor, VerticalAlignment ver)
         {
-            return $"{type.Name}:{fontColorHex}:{backgroundColorHex}:{isBold}:{isStroked}";
+            return $"{type.Name}:{fontColorHex}:{backgroundColorHex}:{isBold}:{isStroked}:{hor}:{ver}";
+        }
+
+        private static VerticalAlignmentValues ToVerticalAlignmentValues(VerticalAlignment ver)
+        {
+            switch (ver)
+            {
+                case VerticalAlignment.Bottom:
+                    return VerticalAlignmentValues.Bottom;
+                case VerticalAlignment.Center:
+                    return VerticalAlignmentValues.Center;
+                case VerticalAlignment.Top:
+                    return VerticalAlignmentValues.Top;
+                default:
+                    throw new NotSupportedException(ver.ToString());
+            }
+        }
+
+        private static HorizontalAlignmentValues ToHorizontalAlignmentValues(HorizontalAlignment hor)
+        {
+            switch (hor)
+            {
+                case HorizontalAlignment.Left:
+                    return HorizontalAlignmentValues.Left;
+                case HorizontalAlignment.Center:
+                    return HorizontalAlignmentValues.Center;
+                case HorizontalAlignment.Right:
+                    return HorizontalAlignmentValues.Right;
+                default:
+                    throw new NotSupportedException(hor.ToString());
+            }
         }
     }
 }

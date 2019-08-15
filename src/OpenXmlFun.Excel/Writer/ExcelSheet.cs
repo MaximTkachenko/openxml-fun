@@ -14,12 +14,14 @@ namespace OpenXmlFun.Excel.Writer
     {
         private readonly Worksheet _sheet;
         private readonly SheetData _sheetData;
+        private readonly ExcelStylesheetProvider _styles;
         private uint _rowIndex = 1;
 
-        internal ExcelSheet(WorksheetPart sheetPart)
+        internal ExcelSheet(WorksheetPart sheetPart, ExcelStylesheetProvider styles)
         {
             _sheet = sheetPart.Worksheet;
             _sheetData = sheetPart.Worksheet.GetFirstChild<SheetData>();
+            _styles = styles;
 
             //set default columns' widths
             ApplyColumnWidths(20);
@@ -53,6 +55,7 @@ namespace OpenXmlFun.Excel.Writer
                 for (int i = 0; i < cells.Length; i++)
                 {
                     var cell = cells[i].Create(i, _rowIndex);
+                    cell.StyleIndex = _styles.GetStyleId(cells[i]);
                     row.AppendChild(cell);
                 }
             }
@@ -142,6 +145,44 @@ namespace OpenXmlFun.Excel.Writer
             sheetView.Append(selection);
             sheetViews.Append(sheetView);
 
+            return this;
+        }
+
+        public ExcelSheet AddColumnFilter(int columnNumber, int belowRowNumber)
+        {
+            if (columnNumber <= 0)
+            {
+                throw new ArgumentNullException($"Minimum value of {nameof(columnNumber)} is 1");
+            }
+
+            if (belowRowNumber <= 0)
+            {
+                throw new ArgumentNullException($"Minimum value of {nameof(belowRowNumber)} is 1");
+            }
+
+            var cell = $"{ColumnAliases.ExcelColumnNames[columnNumber - 1]}{belowRowNumber}";
+            _sheet.Append(new AutoFilter { Reference = $"{cell}:{cell}" });
+            return this;
+        }
+
+        public ExcelSheet AddColumnFilters(int fromColumnNumber, int toColumnNumber, int belowRowNumber)
+        {
+            if (fromColumnNumber <= 0)
+            {
+                throw new ArgumentNullException(nameof(fromColumnNumber));
+            }
+
+            if (toColumnNumber <= 0)
+            {
+                throw new ArgumentNullException(nameof(toColumnNumber));
+            }
+
+            if (belowRowNumber <= 0)
+            {
+                throw new ArgumentNullException(nameof(belowRowNumber));
+            }
+
+            _sheet.Append(new AutoFilter { Reference = $"{ColumnAliases.ExcelColumnNames[fromColumnNumber - 1]}{belowRowNumber}:{ColumnAliases.ExcelColumnNames[toColumnNumber - 1]}{belowRowNumber}" });
             return this;
         }
 
