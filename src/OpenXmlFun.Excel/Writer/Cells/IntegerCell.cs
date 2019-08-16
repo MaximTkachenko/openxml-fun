@@ -8,7 +8,7 @@ namespace OpenXmlFun.Excel.Writer.Cells
         public IntegerCell(int value) : base(value)
         { }
 
-        protected override void Apply(Cell cell, int columnIndex, uint rowIndex)
+        internal override void Apply(Cell cell, int columnIndex, uint rowIndex)
         {
             cell.DataType = CellValues.Number;
             cell.CellValue = new CellValue(Value == 0 ? string.Empty : Value.ToString(CultureInfo.InvariantCulture));

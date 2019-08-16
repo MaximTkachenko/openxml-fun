@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace OpenXmlFun.Excel.Writer
 {
-    internal static class NumberFormats
+    internal static class SupportedTypesFormats
     {
         //list of predefined NumberFormatId values https://github.com/closedxml/closedxml/wiki/NumberFormatId-Lookup-Table
         public static readonly Dictionary<Type, uint> Data = new Dictionary<Type, uint>

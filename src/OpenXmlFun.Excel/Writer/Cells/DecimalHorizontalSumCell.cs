@@ -16,7 +16,7 @@ namespace OpenXmlFun.Excel.Writer.Cells
         public int FromColumnNumber { get; }
         public int ToColumnNumber { get; }
 
-        protected override void Apply(Cell cell, int columnIndex, uint rowIndex)
+        internal override void Apply(Cell cell, int columnIndex, uint rowIndex)
         {
             cell.CellFormula = new CellFormula($"SUBTOTAL(9,{ColumnAliases.ExcelColumnNames[FromColumnNumber - 1]}{rowIndex}:{ColumnAliases.ExcelColumnNames[ToColumnNumber - 1]}{rowIndex})")
             {

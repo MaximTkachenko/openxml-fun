@@ -8,7 +8,6 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace OpenXmlFun.Excel.Writer
 {
-    /// <inheritdoc />
     /// <summary>
     /// https://stackoverflow.com/questions/2792304/how-to-insert-a-date-to-an-open-xml-worksheet
     /// http://www.dispatchertimer.com/tutorial/how-to-create-an-excel-file-in-net-using-openxml-part-3-add-stylesheet-to-the-spreadsheet/
@@ -24,6 +23,7 @@ namespace OpenXmlFun.Excel.Writer
             {
                 throw new ArgumentException($"Specify {nameof(filePath)}.");
             }
+
             _spreadsheetDocument = SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook);
             _spreadsheetDocument.AddWorkbookPart();
             _spreadsheetDocument.WorkbookPart.Workbook = new Workbook();

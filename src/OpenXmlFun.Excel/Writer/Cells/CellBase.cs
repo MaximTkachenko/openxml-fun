@@ -13,7 +13,7 @@ namespace OpenXmlFun.Excel.Writer.Cells
         public VerticalAlignment VerticalAlignment { get; set; }
         public bool EmptyOnDefault { get; set; }
 
-        internal abstract Cell Create(int columnIndex, uint rowIndex);
+        internal abstract void Apply(Cell cell, int columnIndex, uint rowIndex);
         internal abstract Type TypeOfValue { get; }
     }
 }

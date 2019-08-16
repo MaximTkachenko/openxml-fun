@@ -47,7 +47,7 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
                 writer.AddSheet("test_3")
                     .AddRow(new DecimalCell(222.88M), new DecimalCell(666M), new DecimalHorizontalSumCell(1, 2))
                     .AddRow(new DecimalCell(11M), new DecimalCell(22M), new DecimalHorizontalSumCell(1, 2))
-                    .AddRow(new DecimalVerticalSumCell(1, 2), new DecimalVerticalSumCell(1, 2));
+                    .AddRow(new DecimalVerticalSumCell(1, 2), new DecimalVerticalSumCell(1, 2), new DecimalSumCell(1, 2, 1, 2));
             }
         }
     }

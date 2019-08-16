@@ -9,7 +9,7 @@ namespace OpenXmlFun.Excel.Writer.Cells
         public DateTimeCell(DateTime value) : base(value)
         { }
 
-        protected override void Apply(Cell cell, int columnIndex, uint rowIndex)
+        internal override void Apply(Cell cell, int columnIndex, uint rowIndex)
         {
             cell.DataType = CellValues.Number;
             cell.CellValue = new CellValue(Value == DateTime.MinValue ? string.Empty : Value.ToOADate().ToString(CultureInfo.InvariantCulture));

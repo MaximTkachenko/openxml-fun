@@ -134,7 +134,7 @@ namespace OpenXmlFun.Excel.Writer
                         continue;
                     }
 
-                    foreach (var typeDetails in NumberFormats.Data)
+                    foreach (var typeDetails in SupportedTypesFormats.Data)
                     foreach (HorizontalAlignment hor in Enum.GetValues(typeof(HorizontalAlignment)))
                     foreach (VerticalAlignment ver in Enum.GetValues(typeof(VerticalAlignment)))
                     {

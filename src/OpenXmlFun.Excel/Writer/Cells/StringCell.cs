@@ -7,7 +7,7 @@ namespace OpenXmlFun.Excel.Writer.Cells
         public StringCell(string value) : base(value)
         { }
 
-        protected override void Apply(Cell cell, int columnIndex, uint rowIndex)
+        internal override void Apply(Cell cell, int columnIndex, uint rowIndex)
         {
             cell.DataType = CellValues.String;
             cell.CellValue = new CellValue(string.IsNullOrWhiteSpace(Value) ? string.Empty : Value);
