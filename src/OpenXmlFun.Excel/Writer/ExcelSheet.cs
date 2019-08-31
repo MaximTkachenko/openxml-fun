@@ -159,24 +159,37 @@ namespace OpenXmlFun.Excel.Writer
             return this;
         }
 
-        public ExcelSheet AddColumnFilters(int fromColumnNumber, int toColumnNumber, int belowRowNumber)
+        public ExcelSheet AddColumnFilters(int fromColumn, int toColumn, int belowRow)
         {
-            if (fromColumnNumber <= 0)
+            if (fromColumn <= 0)
             {
-                throw new ArgumentException($"{nameof(fromColumnNumber)} must be greater than zero.");
+                throw new ArgumentException($"{nameof(fromColumn)} must be greater than zero.");
             }
 
-            if (toColumnNumber <= 0)
+            if (toColumn <= 0)
             {
-                throw new ArgumentException($"{nameof(toColumnNumber)} must be greater than zero.");
+                throw new ArgumentException($"{nameof(toColumn)} must be greater than zero.");
             }
 
-            if (belowRowNumber <= 0)
+            if (belowRow <= 0)
             {
-                throw new ArgumentException($"{nameof(belowRowNumber)} must be greater than zero.");
+                throw new ArgumentException($"{nameof(belowRow)} must be greater than zero.");
             }
 
-            _sheet.Append(new AutoFilter { Reference = $"{ColumnAliases.ExcelColumnNames[fromColumnNumber - 1]}{belowRowNumber}:{ColumnAliases.ExcelColumnNames[toColumnNumber - 1]}{belowRowNumber}" });
+            _sheet.Append(new AutoFilter { Reference = $"{ColumnAliases.ExcelColumnNames[fromColumn - 1]}{belowRow}:{ColumnAliases.ExcelColumnNames[toColumn - 1]}{belowRow}" });
+            return this;
+        }
+
+        public ExcelSheet MergeCells(int fromRow, int toRow, int fromColumn, int toColumn)
+        {
+            var mergeCells = _sheet.Elements<MergeCells>().FirstOrDefault();
+            if (mergeCells == null)
+            {
+                mergeCells = new MergeCells();
+                _sheet.InsertAfter(mergeCells, _sheet.Elements<SheetData>().First());
+            }
+            
+            mergeCells.Append(new MergeCell { Reference = new StringValue($"{ColumnAliases.ExcelColumnNames[fromColumn - 1]}{fromRow}:{ColumnAliases.ExcelColumnNames[toColumn - 1]}{toRow}") });
             return this;
         }
 

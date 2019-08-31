@@ -47,7 +47,15 @@ namespace OpenXmlFun.Excel.IntegrationTests.Writer
                 writer.AddSheet("test_3")
                     .AddRow(new DecimalCell(222.88M), new DecimalCell(666M), new DecimalHorizontalSumCell(1, 2))
                     .AddRow(new DecimalCell(11M), new DecimalCell(22M), new DecimalHorizontalSumCell(1, 2))
-                    .AddRow(new DecimalVerticalSumCell(1, 2), new DecimalVerticalSumCell(1, 2), new DecimalSumCell(1, 2, 1, 2));
+                    .AddRow(new DecimalVerticalSumCell(1, 2), new DecimalVerticalSumCell(1, 2), new DecimalSumCell(1, 2, 1, 2))
+                    .AddRow(new StringCell("a1"), new DecimalCell(5.5M), new StringCell("c1"), new StringCell("d1"))
+                    .AddRow(new DateTimeCell(DateTime.UtcNow), new StringCell("b2"), new StringCell("c2"), new StringCell("d2"))
+                    .AddRow(new DecimalCell(6.6M), new StringCell("b3"), new StringCell("c3"), new StringCell("d3"))
+                    .AddRow(new StringCell("a4"), new DateTimeCell(DateTime.UtcNow), new StringCell("c4"), new StringCell("d4"))
+                    .AddRow(new StringCell("a5"), new StringCell("b5"), new StringCell("c5"), new StringCell("d5"))
+                    .MergeCells(4,4,1,3)
+                    .MergeCells(5, 6, 1, 1)
+                    .MergeCells(7, 8, 1, 3);
             }
         }
     }
