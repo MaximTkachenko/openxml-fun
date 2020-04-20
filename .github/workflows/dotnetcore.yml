@@ -20,6 +20,6 @@ jobs:
     - name: Install dependencies
       run: dotnet restore src/OpenXmlFun.sln
     - name: Build
-      run: dotnet build OpenXmlFun.sln --configuration Release --no-restore
+      run: dotnet build src/OpenXmlFun.sln --configuration Release --no-restore
     - name: Test
       run: dotnet test src/OpenXmlFun.Excel.IntegrationTests/OpenXmlFun.Excel.IntegrationTests.csproj --no-restore --verbosity normal
